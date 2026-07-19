@@ -5,7 +5,7 @@
      (لأن SW يُنهى ويُعاد تشغيله كثيراً، فذاكرته العادية لا تكفي)
    ============================================================ */
 
-const CACHE_VERSION = "dreamdrift-v1.2";
+const CACHE_VERSION = "dreamdrift-v1.3";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -19,8 +19,6 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_VERSION).then((cache) => cache.addAll(CORE_ASSETS))
   );
-  // فعّل النسخة الجديدة فوراً بدل الانتظار حتى تُغلق كل التبويبات —
-  // بدونها لن يظهر شريط "تحديث الآن" أبداً أثناء الاستخدام العادي
   self.skipWaiting();
 });
 
@@ -31,8 +29,6 @@ self.addEventListener("activate", (event) => {
       const oldKeys = keys.filter((k) => k !== CACHE_VERSION);
       await Promise.all(oldKeys.map((k) => caches.delete(k)));
       await self.clients.claim();
-      // أبلغ الصفحات المفتوحة بوجود نسخة جديدة — فقط إن كان هناك تخزين قديم
-      // (أي أن هذا تحديث لا أول تثبيت)
       if (oldKeys.length) {
         const clientsList = await self.clients.matchAll();
         clientsList.forEach((c) => c.postMessage({ type: "SW_UPDATED" }));
@@ -46,7 +42,7 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
-  if (url.origin !== location.origin) return; // اترك الخطوط الخارجية للمتصفح
+  if (url.origin !== location.origin) return;
 
   const isNav = req.mode === "navigate" || url.pathname.endsWith("index.html");
   event.respondWith(isNav ? networkFirst(req) : cacheFirst(req));
@@ -72,7 +68,7 @@ async function cacheFirst(req) {
     cache.put(req, fresh.clone());
     return fresh;
   } catch (e) {
-    return cached; // undefined إن لم يوجد — يفشل الطلب بصمت، مقبول لأصل غير أساسي
+    return cached;
   }
 }
 
@@ -128,7 +124,6 @@ const MSG = {
   },
 };
 
-// "HH:MM" الحالية بتوقيت الجهاز
 function nowHM() {
   const d = new Date();
   return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
@@ -137,14 +132,13 @@ function todayKey() {
   const d = new Date();
   return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
 }
-// فرق دقائق بين وقتين "HH:MM" (0..1439، يتعامل مع التفاف منتصف الليل)
 function minutesDiff(target, current) {
   const [th, tm] = target.split(":").map(Number);
   const [ch, cm] = current.split(":").map(Number);
   let diff = (ch * 60 + cm) - (th * 60 + tm);
   if (diff < -720) diff += 1440;
   if (diff > 720) diff -= 1440;
-  return diff; // موجب = الوقت الحالي بعد الهدف
+  return diff;
 }
 
 async function saveSchedule(patch) {
@@ -158,12 +152,11 @@ async function clearSchedule() {
 async function fireIfDue(kind, time, lang) {
   if (!time) return;
   const diff = minutesDiff(time, nowHM());
-  // نافذة ٥ دقائق بعد الموعد (تغطي فحص فتح التطبيق + كل ١٥ دقيقة عبر periodicSync)
   if (diff < 0 || diff > 5) return;
 
   const firedKey = "fired_" + kind;
   const sched = (await idbGet("schedule")) || {};
-  if (sched[firedKey] === todayKey()) return; // أُطلق اليوم بالفعل
+  if (sched[firedKey] === todayKey()) return;
 
   const m = MSG[kind][lang === "en" ? "en" : "ar"];
   await self.registration.showNotification(m.title, {
@@ -197,10 +190,26 @@ self.addEventListener("message", (event) => {
     event.waitUntil(clearSchedule());
   } else if (data.type === "SKIP_WAITING") {
     self.skipWaiting();
+  } else if (data.type === "GET_STATUS") {
+    event.waitUntil(
+      (async () => {
+        const sched = (await idbGet("schedule")) || {};
+        const port = event.ports && event.ports[0];
+        if (port) {
+          port.postMessage({
+            type: "STATUS",
+            schedule: sched,
+            nowHM: nowHM(),
+            todayKey: todayKey(),
+            cacheVersion: CACHE_VERSION,
+          });
+        }
+      })()
+    );
   }
 });
 
-/* ---------------- الفحص الدوري (إن كان periodicSync مدعوماً ومسموحاً) ---------------- */
+/* ---------------- الفحص الدوري ---------------- */
 self.addEventListener("periodicsync", (event) => {
   if (event.tag === "dd-notif-check") {
     event.waitUntil(checkAndFireNotifications());
