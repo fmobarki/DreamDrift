@@ -5,7 +5,7 @@
      (لأن SW يُنهى ويُعاد تشغيله كثيراً، فذاكرته العادية لا تكفي)
    ============================================================ */
 
-const CACHE_VERSION = "dreamdrift-v1";
+const CACHE_VERSION = "dreamdrift-v1.2";
 const CORE_ASSETS = [
   "./",
   "./index.html",
