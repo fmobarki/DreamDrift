@@ -1,0 +1,14 @@
+# نظام التشغيل والمحررات
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# سجلات
+*.log
+
+# لو أُضيفت أدوات بناء أو حزم لاحقاً
+node_modules/
+dist/
+.env

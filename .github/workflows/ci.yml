@@ -1,0 +1,67 @@
+name: CI/CD
+
+# يعمل على كل push وكل pull request إلى main — الاختبار دائماً.
+# النشر يحدث فقط بعد نجاح الاختبارات، وفقط عند push مباشر لفرع main
+# (وليس على pull requests، لتفادي نشر كود لم يُدمَج بعد).
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: # يسمح بتشغيل يدوي من تبويب Actions عند الحاجة
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: تشغيل الاختبارات
+    runs-on: ubuntu-latest
+    steps:
+      - name: سحب الكود
+        uses: actions/checkout@v4
+
+      - name: تجهيز Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: تشغيل حزمة الاختبارات (71 اختباراً)
+        run: npm test
+
+      - name: فحص أن لا ملفات PWA مفقودة (manifest.json و sw.js)
+        run: |
+          test -f manifest.json || (echo "::error::manifest.json مفقود" && exit 1)
+          test -f sw.js || (echo "::error::sw.js مفقود" && exit 1)
+          test -d icons || (echo "::error::مجلد icons مفقود" && exit 1)
+          echo "✅ كل ملفات PWA الأساسية موجودة"
+
+  deploy:
+    name: نشر على GitHub Pages
+    needs: test # لا ينشر إلا بعد نجاح كل الاختبارات أعلاه
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: سحب الكود
+        uses: actions/checkout@v4
+
+      - name: تجهيز GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: رفع الملفات الثابتة كأصل نشر
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "."
+
+      - name: النشر
+        id: deployment
+        uses: actions/deploy-pages@v4
