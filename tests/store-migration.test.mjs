@@ -98,4 +98,32 @@ describe("Store._migrate — ترحيل عبر الإصدارات", () => {
     Store.load();
     assert.equal(Store.data.name, "أحمد");
   });
+
+  test("v4 → v5: نصيحة ذكاء اصطناعي مخزَّنة بالنموذج القديم (aiLastTip) تتحوّل لأول سجل في aiHistory بلا فقدان", () => {
+    const { Store } = buildStore({
+      dd_data: JSON.stringify({
+        __schemaVersion: 4,
+        aiLastTip: { t: "نصيحة قديمة", why: "سبب قديم" },
+        aiLastCallTs: 1700000000000,
+        aiLastCallDxKey: "delay",
+        aiProvider: "anthropic",
+      }),
+    });
+    Store.load();
+    assert.equal(Store.data.aiLastTip, undefined, "يجب حذف المفتاح القديم بعد الترحيل");
+    assert.equal(Store.data.aiLastCallTs, undefined);
+    assert.equal(Store.data.aiLastCallDxKey, undefined);
+    assert.equal(Store.data.aiHistory.length, 1);
+    assert.equal(Store.data.aiHistory[0].t, "نصيحة قديمة");
+    assert.equal(Store.data.aiHistory[0].why, "سبب قديم");
+    assert.equal(Store.data.aiHistory[0].ts, 1700000000000);
+    assert.equal(Store.data.aiHistory[0].provider, "anthropic");
+    assert.equal(Store.data.aiHistory[0].dxKey, "delay");
+  });
+
+  test("v4 → v5: مستخدم لم يفعّل الذكاء الاصطناعي إطلاقاً يحصل على aiHistory فارغة لا خطأ", () => {
+    const { Store } = buildStore({ dd_data: JSON.stringify({ __schemaVersion: 4 }) });
+    assert.doesNotThrow(() => Store.load());
+    assert.deepEqual(structuredClone(Store.data.aiHistory), []);
+  });
 });

@@ -49,6 +49,10 @@ export function runInContext(code, context, filename = "extracted.js") {
 
 /** عنصر DOM وهمي بأدنى واجهة تكفي الكود المُختبَر */
 export function mockElement(id = "") {
+  // classList بحالة حقيقية (Set داخلي) — النسخة السابقة كانت دوالاً بلا أثر
+  // (add لا يُخزِّن شيئاً، contains تُعيد false دائماً)، فكانت تكفي فقط للتحقق
+  // من عدم رمي خطأ عند الاستدعاء، لا للتحقق الفعلي من إضافة/إزالة صنف ما.
+  const classes = new Set();
   return {
     id,
     style: {},
@@ -57,7 +61,15 @@ export function mockElement(id = "") {
     innerHTML: "",
     value: "",
     classList: {
-      add() {}, remove() {}, toggle() {}, contains() { return false; },
+      add(...names) { names.forEach((n) => classes.add(n)); },
+      remove(...names) { names.forEach((n) => classes.delete(n)); },
+      toggle(name, force) {
+        const has = classes.has(name);
+        const shouldHave = force === undefined ? !has : !!force;
+        if (shouldHave) classes.add(name); else classes.delete(name);
+        return shouldHave;
+      },
+      contains(name) { return classes.has(name); },
     },
     addEventListener() {}, removeEventListener() {},
     setAttribute() {}, getAttribute() { return null; },

@@ -4,6 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0B1020">
+<!-- CSP خفيفة: تمنع تحميل أي سكربت/اتصال من مصدر غير مُدرَج صراحة (أخطر ناقل
+     فعلي لهجمات XSS هو حقن سكربت من نطاق خارجي) دون هجرة كاملة لـ 113 معالج
+     onclick داخلي إلى addEventListener — تلك خطوة أعقد نُفضّل تأجيلها. لذا
+     'unsafe-inline' لا تزال مطلوبة للسكربت/الأنماط المضمَّنة، وهذا يعني عدم
+     منع الحقن *المضمَّن* لو حدث أصلاً، لكنه يمنع تحميل أي حمولة من نطاق خارجي.
+     المصادر أدناه هي فقط ما يُستخدَم فعلياً في هذه الصفحة (تحقّقنا منها). -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src https://fonts.gstatic.com;
+  img-src 'self';
+  connect-src 'self' https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com;
+  worker-src 'self';
+  object-src 'none';
+  base-uri 'self';
+  form-action 'self';
+  frame-ancestors 'none';
+">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,6 +32,18 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>DreamDrift — سُكون</title>
+<meta name="description" content="رفيقك الليلي لتتبّع النوم والمزاج والتنفّس والاسترخاء — يعمل بالكامل محلياً على جهازك، بلا خادم وبلا تتبّع.">
+<!-- Open Graph — لمعاينة صحيحة عند مشاركة الرابط -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="DreamDrift — سُكون">
+<meta property="og:description" content="رفيقك الليلي لتتبّع النوم والمزاج والتنفّس والاسترخاء — يعمل بالكامل محلياً على جهازك، بلا خادم وبلا تتبّع.">
+<meta property="og:image" content="https://fmobarki.github.io/DreamDrift/icons/icon-512.png">
+<meta property="og:url" content="https://fmobarki.github.io/DreamDrift/">
+<meta property="og:locale" content="ar_AR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DreamDrift — سُكون">
+<meta name="twitter:description" content="رفيقك الليلي لتتبّع النوم والمزاج والتنفّس والاسترخاء.">
+<meta name="twitter:image" content="https://fmobarki.github.io/DreamDrift/icons/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -59,6 +90,16 @@
 }
 
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+/* يُخفي العنصر بصرياً مع إبقائه مقروءاً لقارئات الشاشة — يُستخدَم لنصوص
+   توضيحية (مثل legend) لا داعي لتكرارها بصرياً بجانب عنوان مرئي مطابق أصلاً */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0}
+/* مؤشر تركيز عام واضح للتنقل بلوحة المفاتيح — كان شبه غائب (استخدام واحد فقط
+   سابقاً لعنصر بعينه)، فلا يعرف من يعتمد على Tab أين هو حالياً في الصفحة. */
+:focus-visible{outline:2px solid var(--calm);outline-offset:2px;border-radius:6px}
+button:focus-visible,[role="button"]:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--calm);outline-offset:2px;
+}
 html,body{height:100%}
 body{
   font-family:'Cairo',sans-serif;
@@ -206,7 +247,7 @@ body::after{
   transition:border var(--normal);
 }
 .field:focus{outline:none;border-color:var(--primary)}
-.lang-opts,.remind-opts{display:flex;flex-direction:column;gap:12px;margin-top:var(--s4)}
+.lang-opts,.remind-opts{display:flex;flex-direction:column;gap:12px;margin-top:var(--s4);border:none;padding:0}
 .opt{
   width:100%;padding:16px 20px;text-align:center;font-size:16px;font-weight:600;
   background:var(--w06);border:1.5px solid rgba(167,139,250,.2);
@@ -242,7 +283,7 @@ body::after{
 .greet .insight b{color:var(--calm)}
 .topbar-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
 .icon-btn{
-  width:40px;height:40px;border-radius:50%;font-size:17px;
+  width:48px;height:48px;border-radius:50%;font-size:17px;
   background:var(--w08);border:1px solid rgba(167,139,250,.2);
   display:grid;place-items:center;transition:transform var(--fast),background var(--normal);
 }
@@ -698,9 +739,9 @@ body.app-ready .bottom-nav{transform:none;visibility:visible;overflow:visible}
 .sleep-timer-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;
   background:rgba(0,212,255,.15);border:1px solid rgba(0,212,255,.3);color:var(--calm)}
 .timer-opts{display:flex;gap:8px;flex-wrap:wrap}
-.timer-opt{padding:9px 14px;border-radius:12px;font-size:13px;font-weight:700;
+.timer-opt{padding:13px 14px;border-radius:12px;font-size:13px;font-weight:700;
   background:var(--w05);border:1.5px solid var(--w1);
-  color:var(--muted);transition:all var(--normal)}
+  color:var(--muted);transition:all var(--normal);min-height:44px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center}
 .timer-opt.sel{background:rgba(109,93,246,.2);border-color:var(--primary);color:var(--accent)}
 .timer-opt:active{transform:scale(.95)}
 .timer-countdown{display:flex;align-items:center;gap:10px;margin-top:12px;
@@ -796,8 +837,11 @@ body.app-ready .bottom-nav{transform:none;visibility:visible;overflow:visible}
 .wr-modal{padding:20px;max-width:380px}
 .wr-modal .close{position:absolute;top:14px;inset-inline-end:14px}
 #wrCanvas{width:100%;height:auto;border-radius:16px;display:block;margin-top:10px}
-.wr-actions{display:flex;gap:10px;margin-top:16px}
-.wr-actions .btn-primary{flex:1}
+.wr-actions{display:flex;gap:10px;margin-top:16px;align-items:stretch}
+/* نُصفّر الهامش العلوي للزرّين معاً: .btn-primary يرث 24px و.ghost داخل النوافذ
+   يرث 8px، والفارق بينهما كان يُنتج إزاحة رأسية واضحة داخل الصف المرن */
+.wr-actions .btn-primary,
+.wr-actions .btn-primary.ghost{flex:1;margin-top:0}
 .backup-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
 .backup-sub{font-size:12px;color:var(--muted);margin-top:3px}
 .backup-shield{font-size:28px;filter:drop-shadow(0 0 8px rgba(109,93,246,.4))}
@@ -1203,9 +1247,17 @@ body.app-ready .bottom-nav{transform:none;visibility:visible;overflow:visible}
 /* شريط الانجراف الليلي */
 .dda-axis{
   display:flex;justify-content:space-between;direction:ltr;
-  font-size:9px;color:var(--faint);margin:0 0 6px 42px;font-variant-numeric:tabular-nums;
+  font-size:9px;color:var(--faint);margin:0 0 10px 42px;font-variant-numeric:tabular-nums;
+  padding-bottom:6px;border-bottom:1px dashed var(--w08);
 }
-html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
+/* يميّز الطرف الأيمن (١٨:٠٠ الثانية) كـ"اليوم التالي" — بدون هذا يبدو المحور
+   وكأنه يعرض نفس اللحظة مرتين، بينما هو فعلياً يمتد ٢٤ ساعة كاملة من المساء
+   إلى مساء اليوم التالي (قرار مقصود يُبقي فترة النوم كاملة في وسط الرسم). */
+.dda-axis-next{
+  font-style:normal;font-size:7px;color:var(--calm);margin-inline-start:3px;
+  vertical-align:super;
+}
+html[dir="ltr"] .dda-axis{margin:0 0 10px 42px}
 .dda-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
 .dda-day{
   font-size:9px;color:var(--faint);width:34px;flex:none;text-align:start;
@@ -1321,10 +1373,11 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
   <div class="ob-step active" data-step="0">
     <div class="brand-logo ob-brand"><svg viewBox="0 0 180 155" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="mGob" x1="40" y1="5" x2="130" y2="105" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#5DD6F7"/><stop offset="40%" stop-color="#7B6CF6"/><stop offset="100%" stop-color="#A855C8"/></linearGradient><linearGradient id="wGob" x1="0" y1="0" x2="180" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#5DD6F7"/><stop offset="100%" stop-color="#7B6CF6"/></linearGradient><filter id="mGlob"><feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M90 6 A50 50 0 1 0 90 106 A38 38 0 1 1 90 6 Z" fill="url(#mGob)" filter="url(#mGlob)"/><path d="M107 24 L109.5 16 L112 24 L120 26.5 L112 29 L109.5 37 L107 29 L99 26.5 Z" fill="white" opacity=".98"/><path d="M120 46 L121.8 40.5 L123.6 46 L129 47.8 L123.6 49.6 L121.8 55 L120 49.6 L114.5 47.8 Z" fill="#C4B5FD" opacity=".9"/><path d="M12 116 C35 108 60 120 90 114 C120 108 148 120 168 112" stroke="url(#wGob)" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M18 128 C42 120 65 132 90 126 C115 120 140 132 162 124" stroke="url(#wGob)" stroke-width="3" stroke-linecap="round" fill="none" opacity=".7"/></svg></div>
     <h2 data-t="ob3_title">اختر لغتك</h2>
-    <div class="lang-opts">
+    <fieldset class="lang-opts">
+      <legend class="sr-only" data-t="ob3_title">اختر لغتك</legend>
       <button class="opt sel" data-lang="ar" onclick="ob.lang('ar',this)">العربية</button>
       <button class="opt" data-lang="en" onclick="ob.lang('en',this)">English</button>
-    </div>
+    </fieldset>
     <button class="btn-primary" onclick="ob.next()" data-t="ob_continue">متابعة</button>
   </div>
   <!-- step 1: welcome -->
@@ -1381,7 +1434,7 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
     <div class="mood-grid" id="moodGrid">
 
       <!-- 1: Calm — وجه حزين، تدرّج برتقالي-أحمر -->
-      <button class="mood" data-m="1">
+      <button class="mood" data-m="1" aria-pressed="false">
         <svg class="mood-face" viewBox="0 0 56 56" fill="none">
           <defs>
             <linearGradient id="g1" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
@@ -1400,7 +1453,7 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
       </button>
 
       <!-- 2: Neutral — ابتسامة خفيفة، تدرّج برتقالي-ذهبي -->
-      <button class="mood" data-m="2">
+      <button class="mood" data-m="2" aria-pressed="false">
         <svg class="mood-face" viewBox="0 0 56 56" fill="none">
           <defs>
             <linearGradient id="g2" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
@@ -1419,7 +1472,7 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
       </button>
 
       <!-- 3: Good — ابتسامة متوسطة، تدرّج ذهبي-أصفر -->
-      <button class="mood" data-m="3">
+      <button class="mood" data-m="3" aria-pressed="false">
         <svg class="mood-face" viewBox="0 0 56 56" fill="none">
           <defs>
             <linearGradient id="g3" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
@@ -1438,7 +1491,7 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
       </button>
 
       <!-- 4: Great — ابتسامة كبيرة، تدرّج أصفر-أخضر -->
-      <button class="mood" data-m="4">
+      <button class="mood" data-m="4" aria-pressed="false">
         <svg class="mood-face" viewBox="0 0 56 56" fill="none">
           <defs>
             <linearGradient id="g4" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
@@ -1457,7 +1510,7 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
       </button>
 
       <!-- 5: Amazing — ممتلئ بالبنفسجي الصلب، وجه مبهج، توهّج خارجي -->
-      <button class="mood" data-m="5">
+      <button class="mood" data-m="5" aria-pressed="false">
         <svg class="mood-face" viewBox="0 0 56 56" fill="none">
           <defs>
             <radialGradient id="g5" cx="40%" cy="35%" r="65%">
@@ -1521,7 +1574,7 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
   </div>
 
   <!-- Sounds quick access -->
-  <div class="card relax-card sounds-card" onclick="app.go('sounds')">
+  <div class="card relax-card sounds-card" onclick="app.go('sounds')" role="button" tabindex="0">
     <div class="row">
       <div class="sound-ico">🎧</div>
       <div class="txt">
@@ -1534,14 +1587,14 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
 
   <!-- Courses & Brain Training quick access -->
   <div class="two-cards">
-    <div class="card half-card quick-link" onclick="app.go('courses')">
+    <div class="card half-card quick-link" onclick="app.go('courses')" role="button" tabindex="0">
       <div class="half-top">
         <div class="half-ico-wrap" style="background:rgba(246,216,96,.15);border:1px solid rgba(246,216,96,.3)">🎓</div>
       </div>
       <b class="quick-link-title" data-t="courses_title">مكتبة الدورات</b>
       <p class="quick-link-sub" data-t="courses_sub">تعلّم علم النوم</p>
     </div>
-    <div class="card half-card quick-link" onclick="app.go('brain')">
+    <div class="card half-card quick-link" onclick="app.go('brain')" role="button" tabindex="0">
       <div class="half-top">
         <div class="half-ico-wrap" style="background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.3)">🧠</div>
       </div>
@@ -1724,7 +1777,7 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
   <div class="card">
     <h2 data-t="brain_breath_title">تمارين تنفّس إضافية</h2>
     <p class="sub" data-t="brain_breath_sub">جرّب نمطاً مختلفاً حسب حاجتك</p>
-    <div class="brain-pattern-card" onclick="quickBreath.open('478')">
+    <div class="brain-pattern-card" onclick="quickBreath.open('478')" role="button" tabindex="0">
       <div class="brain-pattern-ico">🌬️</div>
       <div class="brain-pattern-txt">
         <b data-t="pattern_478_name">4-7-8 للنوم السريع</b>
@@ -1732,7 +1785,7 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
       </div>
       <button class="go">←</button>
     </div>
-    <div class="brain-pattern-card" onclick="quickBreath.open('box')">
+    <div class="brain-pattern-card" onclick="quickBreath.open('box')" role="button" tabindex="0">
       <div class="brain-pattern-ico">🔲</div>
       <div class="brain-pattern-txt">
         <b data-t="pattern_box_name">التنفس المربّع</b>
@@ -1759,17 +1812,17 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
   <div class="card">
     <h2 data-t="brain_viz_title">تصوّر موجّه</h2>
     <p class="sub" data-t="brain_viz_sub">أغمض عينيك واستمع لصوت داخلك</p>
-    <div class="viz-item" onclick="visualize.open('viz1')">
+    <div class="viz-item" onclick="visualize.open('viz1')" role="button" tabindex="0">
       <div class="viz-ico">🏖️</div>
       <div class="viz-txt"><b data-t="viz1_title">الشاطئ الهادئ</b><p data-t="viz1_dur">~45 ثانية للمقطع</p></div>
       <button class="go">←</button>
     </div>
-    <div class="viz-item" onclick="visualize.open('viz2')">
+    <div class="viz-item" onclick="visualize.open('viz2')" role="button" tabindex="0">
       <div class="viz-ico">🌲</div>
       <div class="viz-txt"><b data-t="viz2_title">الغابة الساكنة</b><p data-t="viz2_dur">~45 ثانية للمقطع</p></div>
       <button class="go">←</button>
     </div>
-    <div class="viz-item" onclick="visualize.open('viz3')">
+    <div class="viz-item" onclick="visualize.open('viz3')" role="button" tabindex="0">
       <div class="viz-ico">🧘</div>
       <div class="viz-txt"><b data-t="viz3_title">مسح الجسم</b><p data-t="viz3_dur">~60 ثانية للمقطع</p></div>
       <button class="go">←</button>
@@ -1915,6 +1968,12 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
       <span class="dda-chev">⌄</span>
     </button>
     <div class="dda-body" id="ddaBody"></div>
+    <!-- خارج القسم القابل للطي عمداً: يبقى ظاهراً حتى لو كان الذكاء الاصطناعي
+         مطفأً أو المفتاح محذوفاً — السجل التاريخي ملك للمستخدم بصرف النظر عن ذلك -->
+    <button onclick="aiSettings.openHistory()" style="margin:0 18px 18px;width:calc(100% - 36px);background:none;border:1px solid var(--w15);color:var(--muted);padding:9px 14px;border-radius:10px;font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:space-between">
+      <span data-t="ai_history_btn">📜 سجل التحليلات السابقة</span>
+      <span id="aiHistoryCount" style="opacity:.7"></span>
+    </button>
   </div>
 </section>
 
@@ -2011,10 +2070,10 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
 <section class="screen" id="profile">
   <div class="topbar"><div class="greet"><h1 data-t="nav_profile">حسابي</h1></div></div>
   <div class="card">
-    <div class="list-row clickable" onclick="profile.openName()"><span data-t="p_name">الاسم</span><span class="v"><span id="pName">فهد</span> <span class="chev">›</span></span></div>
-    <div class="list-row clickable" onclick="profile.toggleLang()"><span data-t="p_lang">اللغة</span><span class="v"><span id="pLang">العربية</span> <span class="chev">›</span></span></div>
+    <div class="list-row clickable" onclick="profile.openName()" role="button" tabindex="0"><span data-t="p_name">الاسم</span><span class="v"><span id="pName">فهد</span> <span class="chev">›</span></span></div>
+    <div class="list-row clickable" onclick="profile.toggleLang()" role="button" tabindex="0"><span data-t="p_lang">اللغة</span><span class="v"><span id="pLang">العربية</span> <span class="chev">›</span></span></div>
     <div class="list-row"><span data-t="p_wake">وقت الاستيقاظ</span><span class="v" id="pWake">06:00</span></div>
-    <div class="list-row clickable" onclick="rhythm.openVar()"><span data-t="p_var">الإيقاع المتغيّر (عمل/عطلة)</span><span class="v" id="pVar">معطّل</span></div>
+    <div class="list-row clickable" onclick="rhythm.openVar()" role="button" tabindex="0"><span data-t="p_var">الإيقاع المتغيّر (عمل/عطلة)</span><span class="v" id="pVar">معطّل</span></div>
   </div>
   <button class="btn-primary ghost" onclick="app.reset()" data-t="p_reset">إعادة ضبط التطبيق</button>
 </section>
@@ -2026,17 +2085,17 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
   <!-- الحساب -->
   <div class="card">
     <div class="settings-section-title" data-t="s_account">الحساب</div>
-    <div class="list-row clickable" onclick="profile.openName()"><span data-t="p_name">الاسم</span><span class="v"><span id="sName">فهد</span> <span class="chev">›</span></span></div>
-    <div class="list-row clickable" onclick="profile.toggleLang()"><span data-t="p_lang">اللغة</span><span class="v"><span id="sLang">العربية</span> <span class="chev">›</span></span></div>
+    <div class="list-row clickable" onclick="profile.openName()" role="button" tabindex="0"><span data-t="p_name">الاسم</span><span class="v"><span id="sName">فهد</span> <span class="chev">›</span></span></div>
+    <div class="list-row clickable" onclick="profile.toggleLang()" role="button" tabindex="0"><span data-t="p_lang">اللغة</span><span class="v"><span id="sLang">العربية</span> <span class="chev">›</span></span></div>
   </div>
 
   <!-- النوم -->
   <div class="card">
     <div class="settings-section-title" data-t="s_sleep">النوم</div>
-    <div class="list-row clickable" onclick="usualWake.open()"><span data-t="p_usual_wake">الوقت المعتاد</span><span class="v"><span id="sUsualWakeLabel">06:00</span> <span class="chev">›</span></span></div>
+    <div class="list-row clickable" onclick="usualWake.open()" role="button" tabindex="0"><span data-t="p_usual_wake">الوقت المعتاد</span><span class="v"><span id="sUsualWakeLabel">06:00</span> <span class="chev">›</span></span></div>
     <p class="notif-hint" data-t="p_usual_wake_hint">هذا هو وقت استيقاظك الدائم المستخدم في كل الحسابات ما لم تُحدَّد استثناءً</p>
-    <div class="list-row clickable" onclick="rhythm.openEdit()"><span data-t="p_edit_tomorrow">تعديل الغد فقط</span><span class="v"><span id="sWakeLabel">06:00</span> <span class="chev">›</span></span></div>
-    <div class="list-row clickable" onclick="rhythm.openVar()"><span data-t="p_var">الإيقاع المتغيّر (عمل/عطلة)</span><span class="v"><span id="sVar">معطّل</span></span></div>
+    <div class="list-row clickable" onclick="rhythm.openEdit()" role="button" tabindex="0"><span data-t="p_edit_tomorrow">تعديل الغد فقط</span><span class="v"><span id="sWakeLabel">06:00</span> <span class="chev">›</span></span></div>
+    <div class="list-row clickable" onclick="rhythm.openVar()" role="button" tabindex="0"><span data-t="p_var">الإيقاع المتغيّر (عمل/عطلة)</span><span class="v"><span id="sVar">معطّل</span></span></div>
   </div>
 
   <!-- الإشعارات — تفعيل صريح فقط بإجراء المستخدم -->
@@ -2074,12 +2133,18 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
         </select>
       </div>
       <input type="password" id="aiApiKeyInput" placeholder="sk-..." autocomplete="off" style="margin-top:10px;width:100%;box-sizing:border-box;background:var(--w06);color:var(--text);border:1px solid var(--w15);border-radius:10px;padding:10px 12px;font-family:inherit;font-size:13px;direction:ltr;text-align:left">
+      <input type="text" id="aiModelInput" autocomplete="off" spellcheck="false" style="margin-top:8px;width:100%;box-sizing:border-box;background:var(--w06);color:var(--text);border:1px solid var(--w15);border-radius:10px;padding:10px 12px;font-family:inherit;font-size:13px;direction:ltr;text-align:left">
+      <p class="notif-hint" style="margin-top:6px" data-t="ai_model_hint">اتركه فارغاً للنموذج الافتراضي. إن أوقف المزوّد نموذجاً (يحدث مع جوجل خاصةً)، اكتب اسم نموذج بديل هنا بلا انتظار تحديث للتطبيق.</p>
       <div style="display:flex;gap:8px;margin-top:10px">
         <button class="btn-primary" onclick="aiSettings.save()" data-t="ai_save" style="flex:1;padding:10px">حفظ المفتاح</button>
         <button class="btn-primary ghost" onclick="aiSettings.test()" data-t="ai_test" style="flex:1;padding:10px">اختبار الاتصال</button>
       </div>
       <button onclick="aiSettings.clear()" style="margin-top:8px;width:100%;background:none;border:1px solid rgba(255,90,90,.4);color:#ff8f8f;padding:8px 14px;border-radius:10px;font-size:12px;cursor:pointer;font-family:inherit" data-t="ai_clear">حذف المفتاح</button>
-      <p id="aiTestResult" style="display:none;margin-top:10px;font-size:12px;line-height:1.7"></p>
+      <p id="aiTestResult" style="display:none;margin-top:10px;font-size:12px;line-height:1.7;white-space:pre-wrap;word-break:break-word"></p>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--w1);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted)">
+        <span id="aiUsageCounter"></span>
+        <a id="aiBillingLink" href="#" target="_blank" rel="noopener" style="color:var(--calm);text-decoration:none" data-t="ai_billing_link">تحقّق من رصيدك ↗</a>
+      </div>
     </div>
   </div>
 
@@ -2403,6 +2468,16 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
   </div>
 </div>
 
+<!-- ===================== AI Analysis History Modal ===================== -->
+<div id="aiHistoryModal" class="modal-overlay">
+  <div class="modal" style="max-height:78vh;display:flex;flex-direction:column">
+    <h2 data-t="ai_history_title">سجل التحليلات السابقة</h2>
+    <p class="modal-desc" data-t="ai_history_desc">يبقى محفوظاً على جهازك حتى بعد حذف المفتاح أو تبديل المزوّد.</p>
+    <div id="aiHistoryList" style="overflow-y:auto;flex:1;margin:10px 0;display:flex;flex-direction:column;gap:10px"></div>
+    <button class="btn-primary ghost" onclick="aiSettings.closeHistory()" data-t="edit_cancel">إلغاء</button>
+  </div>
+</div>
+
 
 <!-- ===================== Variable Rhythm Modal ===================== -->
 <div id="varModal" class="modal-overlay">
@@ -2492,7 +2567,27 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
 <div id="quickBreathOverlay" class="modal-overlay">
   <div class="modal qb-modal">
     <button class="close" onclick="quickBreath.stop()">✕</button>
-    <div class="qb-orb" id="qbOrb"></div>
+    <div class="lungs" id="qbLungs">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <defs>
+          <radialGradient id="qbLungGlowR" cx="35%" cy="35%" r="70%">
+            <stop offset="0%" stop-color="rgba(196,181,253,.55)"/>
+            <stop offset="60%" stop-color="rgba(109,93,246,.28)"/>
+            <stop offset="100%" stop-color="rgba(109,93,246,.05)"/>
+          </radialGradient>
+          <radialGradient id="qbLungGlowL" cx="65%" cy="35%" r="70%">
+            <stop offset="0%" stop-color="rgba(167,216,255,.55)"/>
+            <stop offset="60%" stop-color="rgba(0,180,255,.26)"/>
+            <stop offset="100%" stop-color="rgba(0,180,255,.05)"/>
+          </radialGradient>
+        </defs>
+        <path class="trachea" d="M100 20 L100 62 M100 46 L84 58 M100 46 L116 58"/>
+        <path class="lung lung-r" fill="url(#qbLungGlowR)" d="M84 58 C68 62 50 72 40 92 C29 114 26 142 33 162 C38 176 50 184 63 180 C74 176 78 162 79 148 C80 136 78 122 82 108 C85 96 90 82 92 68 C93 62 90 58 84 58 Z"/>
+        <path class="bronchi" d="M78 78 C68 84 58 90 52 102 M74 96 C65 100 56 106 50 118 M70 116 C60 120 52 128 47 140"/>
+        <path class="lung lung-l" fill="url(#qbLungGlowL)" d="M116 58 C132 62 150 72 160 92 C171 114 174 142 167 162 C162 176 150 184 137 180 C126 176 122 162 121 148 C120 136 122 122 118 108 C115 96 110 82 108 68 C107 62 110 58 116 58 Z"/>
+        <path class="bronchi" d="M122 78 C132 84 142 90 148 102 M126 96 C135 100 144 106 150 118 M130 116 C140 120 148 128 153 140"/>
+      </svg>
+    </div>
     <div class="qb-phase" id="qbPhase"></div>
     <div class="qb-count" id="qbCount"></div>
     <button class="btn-primary" id="qbStartBtn" onclick="quickBreath.begin()" data-t="qb_start">ابدأ</button>
@@ -2506,6 +2601,7 @@ html[dir="ltr"] .dda-axis{margin:0 0 6px 42px}
     <div class="viz-orb"></div>
     <p class="viz-text" id="vizText"></p>
     <div class="viz-progress"><i id="vizProgressBar" style="width:0%"></i></div>
+    <p class="modal-desc" style="margin-top:10px;font-size:11px" data-t="viz_safety">لا تستخدمه أثناء القيادة أو تشغيل آلة.</p>
   </div>
 </div>
 
@@ -2786,7 +2882,7 @@ const AutoBackup = {
   }
 };
 
-const SCHEMA_VERSION = 4; // ارفع هذا الرقم عند تغيير بنية البيانات
+const SCHEMA_VERSION = 5; // ارفع هذا الرقم عند تغيير بنية البيانات
 
 const Store = {
   k:'dd_data',
@@ -2825,6 +2921,20 @@ const Store = {
     if(from < 4){
       if(data.mixLevels && "binaural" in data.mixLevels) delete data.mixLevels.binaural;
       if(data.voiceCues === undefined) data.voiceCues = true;
+    }
+    // v4 → v5: نصيحة الذكاء الاصطناعي المخزَّنة صارت سجلاً تراكمياً (aiHistory)
+    // بدل قيمة واحدة تُستبدَل في كل مرة — نحوّل أي نصيحة سابقة لأول سجل بدل فقدها
+    if(from < 5){
+      if(data.aiLastTip && !data.aiHistory){
+        data.aiHistory = [{
+          ts: data.aiLastCallTs || Date.now(),
+          t: data.aiLastTip.t, why: data.aiLastTip.why || "",
+          provider: data.aiProvider || "openai",
+          dxKey: data.aiLastCallDxKey || null
+        }];
+      }
+      delete data.aiLastTip; delete data.aiLastCallTs; delete data.aiLastCallDxKey;
+      if(!data.aiHistory) data.aiHistory = [];
     }
     return data;
   },
@@ -2886,6 +2996,7 @@ const STR = {
     journey_sub:"سجل سكينتك اليومي", mood_chart_title:"مزاجك هذا الأسبوع",
     week_title:"ملخص الأسبوع", avg_mood:"متوسط المزاج", calm_min:"دقائق السكينة", journey_days:"أيام الرحلة",
     calm_log:"سجل التهدئة", no_calm:"لم تبدأ أي جلسة تهدئة بعد.",
+    calm_type_breath:"تمرين تنفّس", calm_type_voice:"استرخاء موجّه بالصوت", calm_type_sounds:"جلسة أصوات مهدّئة",
     sleep_recommended:"الموصى به", sleep_5cycles:"5 دورات نوم",
     score_title:"جودة نومك اليوم", score_na:"سجّل نومك أولاً",
     score_excellent:"ممتاز 🌟", score_good:"جيد 👍", score_fair:"مقبول 😐", score_poor:"يحتاج تحسين 💪",
@@ -3058,6 +3169,7 @@ const STR = {
     voice_relax_title:"استرخاء موجّه بالصوت",
     voice_relax_desc:"صوت هادئ يرشدك خطوة بخطوة لإرخاء جسدك — أغمض عينيك واستمع",
     voice_relax_safety:"لا تستخدمه أثناء القيادة أو تشغيل آلة.",
+    viz_safety:"لا تستخدمه أثناء القيادة أو تشغيل آلة.",
     voice_relax_on:"ابدأ الاسترخاء", voice_relax_off:"إيقاف",
     voice_unavailable:"صوت القراءة العربي غير متوفر على هذا الجهاز",
     voice_quality_hint:"جهازك لا يحتوي صوت قراءة عربي، فسيُستخدم الصوت الافتراضي — قد تكون النطقة غير دقيقة. لتحسينها ثبّت حزمة صوت عربية من إعدادات النظام.",
@@ -3067,8 +3179,19 @@ const STR = {
     ai_toggle_lbl:"صياغة أذكى للنصيحة الأسبوعية",
     ai_hint:"اختياري بالكامل — التحليل الأساسي يعمل دائماً محلياً بلا إنترنت. هذا فقط يُعيد صياغة النصيحة بأسلوب أكثر تنوعاً عبر نموذج تختاره أنت، بمفتاحك الخاص. يُخزَّن المفتاح على جهازك فقط ويُرسَل مباشرة لخادم المزوّد — لا خادم لنا أصلاً. أي تكلفة استخدام تقع عليك مباشرة مع المزوّد.",
     ai_provider_lbl:"المزوّد", ai_save:"حفظ المفتاح", ai_test:"اختبار الاتصال", ai_clear:"حذف المفتاح",
-    ai_key_missing:"أدخل مفتاح API أولاً", ai_saved:"تم حفظ المفتاح", ai_cleared:"تم حذف المفتاح",
+    ai_key_missing:"أدخل مفتاح API أولاً", ai_key_invalid:"هذا لا يبدو مفتاح API صحيحاً — تحقّق من نسخه كاملاً بلا مسافات", ai_saved:"تم حفظ المفتاح", ai_cleared:"تم حذف المفتاح",
     ai_testing:"جارٍ الاختبار…", ai_test_ok:"الاتصال ناجح — النموذج يستجيب", ai_test_fail:"فشل الاتصال — تحقق من المفتاح أو المزوّد",
+    ai_billing_link:"تحقّق من رصيدك ↗",
+    ai_model_hint:"اتركه فارغاً للنموذج الافتراضي. إن أوقف المزوّد نموذجاً (يحدث مع جوجل خاصةً)، اكتب اسم نموذج بديل هنا بلا انتظار تحديث للتطبيق.",
+    ai_err_model:"⚠️ النموذج غير متاح لمفتاحك — جرّب كتابة اسم نموذج بديل في حقل النموذج أعلاه.",
+    ai_err_rate:"⚠️ تجاوزت حد الطلبات المسموح (Rate limit) — انتظر قليلاً ثم أعد المحاولة.",
+    ai_err_auth:"⚠️ المفتاح مرفوض أو بلا صلاحية — تأكّد من نسخه كاملاً ومن تفعيله لدى المزوّد.",
+    ai_usage_none:"لم يُستخدَم بعد هذا الأسبوع",
+    ai_usage_count: n=>"استُخدم "+n+(n===1?" مرة":n===2?" مرتين":" مرات")+" هذا الأسبوع",
+    ai_history_btn:"📜 سجل التحليلات السابقة",
+    ai_history_title:"سجل التحليلات السابقة",
+    ai_history_desc:"يبقى محفوظاً على جهازك حتى بعد حذف المفتاح أو تبديل المزوّد.",
+    ai_history_empty:"لا تحليلات مخزَّنة بعد — ستظهر هنا فور أول تحديث ناجح.",
     brain_viz_title:"تصوّر موجّه", brain_viz_sub:"أغمض عينيك واستمع لصوت داخلك",
     viz1_title:"الشاطئ الهادئ", viz1_dur:"~45 ثانية للمقطع", viz2_title:"الغابة الساكنة", viz2_dur:"~45 ثانية للمقطع",
     viz3_title:"مسح الجسم", viz3_dur:"~60 ثانية للمقطع",
@@ -3140,6 +3263,7 @@ const STR = {
     journey_sub:"Your daily serenity log", mood_chart_title:"Your mood this week",
     week_title:"This week", avg_mood:"Average mood", calm_min:"Calm minutes", journey_days:"Journey days",
     calm_log:"Calm sessions", no_calm:"No calm sessions yet.",
+    calm_type_breath:"Breathing exercise", calm_type_voice:"Voice-guided relaxation", calm_type_sounds:"Calming sounds session",
     sleep_recommended:"Recommended", sleep_5cycles:"5 sleep cycles",
     score_title:"Your sleep quality today", score_na:"Log your sleep first",
     score_excellent:"Excellent 🌟", score_good:"Good 👍", score_fair:"Fair 😐", score_poor:"Needs work 💪",
@@ -3312,6 +3436,7 @@ const STR = {
     voice_relax_title:"Voice-Guided Relaxation",
     voice_relax_desc:"A calm voice walks you through releasing your body step by step — close your eyes and listen",
     voice_relax_safety:"Do not use while driving or operating machinery.",
+    viz_safety:"Do not use while driving or operating machinery.",
     voice_relax_on:"Start relaxation", voice_relax_off:"Stop",
     voice_unavailable:"A spoken voice isn't available on this device",
     voice_quality_hint:"Your device has no Arabic reading voice, so the default will be used — pronunciation may be off. Install an Arabic voice pack in system settings to improve it.",
@@ -3321,8 +3446,19 @@ const STR = {
     ai_toggle_lbl:"Smarter phrasing for weekly tip",
     ai_hint:"Fully optional — core analysis always works locally, offline. This only rephrases the tip more naturally via a model you choose, using your own key. The key is stored on your device only and sent directly to the provider — we have no server at all. Any usage cost is billed to you directly by the provider.",
     ai_provider_lbl:"Provider", ai_save:"Save key", ai_test:"Test connection", ai_clear:"Remove key",
-    ai_key_missing:"Enter an API key first", ai_saved:"Key saved", ai_cleared:"Key removed",
+    ai_key_missing:"Enter an API key first", ai_key_invalid:"This doesn't look like a valid API key — check it was copied fully with no spaces", ai_saved:"Key saved", ai_cleared:"Key removed",
     ai_testing:"Testing…", ai_test_ok:"Connected — the model responded", ai_test_fail:"Connection failed — check your key or provider",
+    ai_billing_link:"Check your balance ↗",
+    ai_model_hint:"Leave empty for the default model. If the provider retires a model (common with Google), type an alternative name here without waiting for an app update.",
+    ai_err_model:"⚠️ Model unavailable for your key — try typing an alternative model name in the field above.",
+    ai_err_rate:"⚠️ Rate limit exceeded — wait a moment and try again.",
+    ai_err_auth:"⚠️ Key rejected or lacks permission — check it was copied fully and is active with the provider.",
+    ai_usage_none:"Not used yet this week",
+    ai_usage_count: n=>"Used "+n+(n===1?" time":" times")+" this week",
+    ai_history_btn:"📜 Past analyses log",
+    ai_history_title:"Past analyses log",
+    ai_history_desc:"Stays on your device even after deleting your key or switching providers.",
+    ai_history_empty:"No analyses saved yet — they'll appear here after the first successful update.",
     brain_viz_title:"Guided Visualization", brain_viz_sub:"Close your eyes and listen to your inner voice",
     viz1_title:"Calm Beach", viz1_dur:"~45s per line", viz2_title:"Quiet Forest", viz2_dur:"~45s per line",
     viz3_title:"Body Scan", viz3_dur:"~60s per line",
@@ -3383,8 +3519,11 @@ function applyLang(){
     const v = dict[el.dataset.tp]; if(typeof v==="string") el.placeholder = v;
   });
   syncAppVersion();
-  // أعد كشف الصوت المرشد للّغة الجديدة وحدّث أزراره
-  try{ if(window.voiceGuide){ voiceGuide.stop(true); voiceGuide.detect(); voiceGuide.refreshToggle(); } }catch(e){}
+  /* ملاحظة حرجة: هذه الكائنات مُعرَّفة بـ const في أعلى مستوى السكربت، وهذا
+     لا يُنشئ خاصية على window إطلاقاً (بخلاف var). فحراسة بصيغة if(window.app)
+     تكون false دائماً والكتلة لا تُنفَّذ صمتاً. الصيغة الصحيحة الوحيدة هنا هي
+     typeof X !== "undefined" — وهي أيضاً تحمي من استدعاء ما لم يُعرَّف بعد. */
+  try{ if(typeof voiceGuide!=="undefined"){ voiceGuide.stop(true); voiceGuide.detect(); voiceGuide.refreshToggle(); } }catch(e){}
   // أعد رسم التحليل التفصيلي باللغة الجديدة (نصوصه خارج STR)
   try{
     const c=document.getElementById("ddaCard");
@@ -3395,6 +3534,21 @@ function applyLang(){
       if(c.dataset.open==="true") SleepAnalysis.render();
     }
   }catch(e){}
+
+  /* إعادة رسم كل محتوى مُولَّد ديناميكياً عبر innerHTML/textContent.
+     data-t أعلاه يغطّي النصوص الثابتة في HTML فقط؛ أما ما يُبنى وقت التشغيل
+     (تواريخ، أسماء أيام، تسميات إحصاءات، عدّادات) فيبقى بلغته القديمة حتى
+     تُغادر الشاشة وتعود إليها. نستدعي كل مُولِّد نشط هنا دفعة واحدة بدل
+     ترقيع كل حالة على حدة كلما اكتُشفت. كلٌّ في try منفصل حتى لا يُسقط
+     فشلُ واحد بقيةَ التحديثات. */
+  try{ if(typeof app!=="undefined" && app.render) app.render(); }catch(e){}
+  try{ if(typeof app!=="undefined" && app.renderSleepBars) app.renderSleepBars(); }catch(e){}
+  try{ if(typeof app!=="undefined" && app.renderJourney) app.renderJourney(); }catch(e){}
+  try{ if(typeof app!=="undefined" && app.renderSleepScore) app.renderSleepScore(); }catch(e){}
+  try{ if(typeof app!=="undefined" && app.renderCycleChips) app.renderCycleChips(); }catch(e){}
+  try{ if(typeof dataManager!=="undefined"){ dataManager.renderStats(); dataManager.renderLastBackup(); } }catch(e){}
+  try{ if(typeof aiSettings!=="undefined") aiSettings.refreshUsage(); }catch(e){}
+  try{ if(typeof recommend!=="undefined" && recommend.render) recommend.render(); }catch(e){}
 }
 
 // يضمن أن رقم الإصدار المعروض دائماً مطابق لـ APP_VERSION — مصدر واحد للحقيقة
@@ -3417,7 +3571,7 @@ const DDA_STR = {
     title:"التحليل التفصيلي", sub:"قراءة أعمق لنومك",
     empty:"سجّل ٣ ليالٍ على الأقل ليبدأ التحليل.",
     emptyWhy:"التحليل يحتاج بيانات كافية قبل أن يقترح أي تغيير.",
-    legWindow:"نافذة نومك", legTarget:"هدف الاستيقاظ", legFlag:"سجل مشكوك فيه",
+    legWindow:"نافذة نومك", legTarget:"هدف الاستيقاظ", legFlag:"سجل مشكوك فيه", axisNextDay:"+١ يوم",
     sAvg:"متوسط ساعات النوم", sGap:"فجوة الاستيقاظ عن هدفك", sWake:"استيقاظك الفعلي",
     r1:"غربلة السجلات", n1:"المِصفاة",
     r2:"قراءة الاتجاه", n2:"البوصلة",
@@ -3437,13 +3591,14 @@ const DDA_STR = {
     fLowMood:"ثلث الأيام أو أكثر بمزاج منخفض",
     fBadFeel:"٤٠٪ من الليالي تُقيَّم بشعور ٢ أو أقل رغم مدة نوم كافية",
     chipRefer:"يُنصح بمراجعة مختص", chipSafe:"لا إشارات خطر",
-    hrs:"س", mins:"د", aiBadge:"عبر الذكاء الاصطناعي"
+    hrs:"س", mins:"د", aiBadge:"عبر الذكاء الاصطناعي",
+    aiUpdatedToday:"· حُدِّثت اليوم", aiUpdatedDays: n=>"· قبل "+n+(n===1?" يوم":" أيام")
   },
   en:{
     title:"Detailed analysis", sub:"A closer read of your sleep",
     empty:"Log at least 3 nights to start the analysis.",
     emptyWhy:"The analysis needs enough data before suggesting any change.",
-    legWindow:"Your sleep window", legTarget:"Wake target", legFlag:"Questionable entry",
+    legWindow:"Your sleep window", legTarget:"Wake target", legFlag:"Questionable entry", axisNextDay:"+1 day",
     sAvg:"Average sleep hours", sGap:"Gap from your wake target", sWake:"Actual wake time",
     r1:"Record screening", n1:"The Sieve",
     r2:"Reading the drift", n2:"The Compass",
@@ -3463,7 +3618,8 @@ const DDA_STR = {
     fLowMood:"A third of days or more at a low mood",
     fBadFeel:"40% of nights rated 2 or below despite enough sleep",
     chipRefer:"Seeing a specialist is advised", chipSafe:"No red flags",
-    hrs:"h", mins:"m", aiBadge:"via AI"
+    hrs:"h", mins:"m", aiBadge:"via AI",
+    aiUpdatedToday:"· updated today", aiUpdatedDays: n=>"· "+n+(n===1?" day":" days")+" ago"
   }
 };
 
@@ -3495,7 +3651,12 @@ const SleepAnalysis = {
     const ok = nights.filter(n=>n.valid), n = ok.length;
     if(n < 3) return null;
     const d = DDA_STR[LANG];
-    const target = this._toMin(Store.get("wakeTime","06:00"));
+    // الوقت الفعّال لا الخام — وإلا تُحسَب فجوة الاستيقاظ (وبالتالي الفرضية
+    // والثقة كلها) بمرجع مختلف عمّا تعرضه بقية الشاشة (الشجرة، الإشعارات،
+    // شريط النوم) لنفس المستخدم في نفس اللحظة. هذا هو الخلل الذي رُصد ميدانياً:
+    // شارة "هدف الاستيقاظ" في الرسم كانت تعرض رقماً لا يطابق ما يراه المستخدم
+    // في بقية التطبيق، لأن هذا الحساب تحديداً بقي يقرأ Store.get("wakeTime").
+    const target = this._toMin(rhythm.effectiveWake().time);
 
     const avgDur  = ok.reduce((s,x)=>s+x.dur,0)/n;
     const avgWake = ok.reduce((s,x)=>s+x.wake,0)/n;
@@ -3582,7 +3743,7 @@ const SleepAnalysis = {
     const flags=this.triage(nights);
     const tip=this.coach(dx);
     const bad=nights.filter(n=>!n.valid);
-    const wakeTime=Store.get("wakeTime","06:00");
+    const wakeTime=rhythm.effectiveWake().time;
     const targetPos=this._onAxis(this._toMin(wakeTime))/14.4;
 
     if(!nights.length){
@@ -3628,7 +3789,7 @@ const SleepAnalysis = {
     }
 
     body.innerHTML = `
-      <div class="dda-axis"><span>18:00</span><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span></div>
+      <div class="dda-axis"><span>18:00</span><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00<i class="dda-axis-next">${d.axisNextDay}</i></span></div>
       ${rows}
       <div class="dda-legend">
         <span><i class="dda-dot" style="background:linear-gradient(90deg,#6D5DF6,#00D4FF)"></i>${d.legWindow}</span>
@@ -3666,7 +3827,7 @@ const SleepAnalysis = {
       </div></div>
 
       <div class="dda-coach">
-        <div class="dda-coach-l">${d.coachL} <span id="ddaCoachBadge" style="display:none;font-size:9px;opacity:.75">✨ ${d.aiBadge||""}</span></div>
+        <div class="dda-coach-l">${d.coachL} <span id="ddaCoachBadge" style="display:none;font-size:9px;opacity:.75">✨ ${d.aiBadge||""}</span><span id="ddaCoachUpdated" style="display:none;font-size:9px;opacity:.6;margin-inline-start:6px"></span></div>
         <p class="dda-coach-t" id="ddaCoachT">${tip.t}</p>
         <p class="dda-coach-w" id="ddaCoachW">${tip.why}</p>
       </div>
@@ -3677,13 +3838,55 @@ const SleepAnalysis = {
     this._enhanceWithAI(dx);
   },
 
+  // سياسة تحديث تقلّل التكلفة الفعلية على المستخدم دون إبقاء نصيحة قديمة طويلاً:
+  // • أول استدعاء: فوري دائماً.
+  // • بعده: لا استدعاء جديد إلا إذا مرّ أسبوع كامل (تحديث إجباري)، أو مرّت 3 أيام
+  //   على الأقل *و* تغيّر التشخيص الجوهري (dx.key) — فيصبح الحد الأقصى الفعلي
+  //   مرتين أسبوعياً تقريباً، لا استدعاءً عند كل تذبذب يومي بسيط في البيانات.
+  // • كل استدعاء ناجح يُضاف كسجل جديد في aiHistory (لا يستبدل واحداً سابقاً)،
+  //   فيبقى للمستخدم أرشيف كامل بالتاريخ والمزوّد ونص كل تحليل، قابل للاستعراض
+  //   وقتما شاء — حتى بعد حذف مفتاحه لاحقاً (aiSettings.clear لا يمسح هذا السجل).
   async _enhanceWithAI(dx){
-    if(typeof aiAdvisor==="undefined" || !aiAdvisor.isConfigured()) return;
+    if(typeof aiAdvisor==="undefined" || !aiAdvisor.isConfigured() || !dx) return;
+
+    const DAY = 86400000;
+    const now = Date.now();
+    const history = Store.get("aiHistory", []);
+    const last = history.length ? history[history.length-1] : null;
+    const daysSince = last ? (now - last.ts) / DAY : Infinity;
+
+    const isFirstCall = !last;
+    const dxChanged = last && dx.key !== last.dxKey;
+    const dueByWeek = daysSince >= 7;
+    const dueByChange = dxChanged && daysSince >= 3;
+
+    if(!isFirstCall && !dueByWeek && !dueByChange){
+      this._applyAITip(last, last.ts); // لم يحن وقت استدعاء جديد — آخر سجل يكفي
+      return;
+    }
+
     const enhanced = await aiAdvisor.generateAdvice(dx, LANG);
     if(!enhanced) return;
-    const tEl=document.getElementById("ddaCoachT"); if(tEl) tEl.textContent=enhanced.t;
-    const wEl=document.getElementById("ddaCoachW"); if(wEl && enhanced.why) wEl.textContent=enhanced.why;
+    const entry = { ts:now, t:enhanced.t, why:enhanced.why||"", provider:Store.get("aiProvider","openai"), dxKey:dx.key };
+    history.push(entry);
+    // سقف معقول (~سنتان بمعدّل أسبوعي) يمنع نمواً غير محدود دون حذف أي بيانات فعلية حديثة
+    if(history.length > 104) history.splice(0, history.length-104);
+    Store.set("aiHistory", history);
+    if(typeof recordAIUsage==="function") recordAIUsage(); // للعدّاد الشفاف في الإعدادات
+    this._applyAITip(entry, now);
+  },
+
+  _applyAITip(tip, ts){
+    const tEl=document.getElementById("ddaCoachT"); if(tEl) tEl.textContent=tip.t;
+    const wEl=document.getElementById("ddaCoachW"); if(wEl && tip.why) wEl.textContent=tip.why;
     const badge=document.getElementById("ddaCoachBadge"); if(badge) badge.style.display="inline";
+    const upd=document.getElementById("ddaCoachUpdated");
+    if(upd && ts){
+      const days=Math.floor((Date.now()-ts)/86400000);
+      const d=DDA_STR[LANG];
+      upd.textContent = days<=0 ? d.aiUpdatedToday : d.aiUpdatedDays(days);
+      upd.style.display="inline";
+    }
   },
 
   init(){
@@ -3934,6 +4137,21 @@ const ob = {
 /* ============================================================
    Breathing Engine — 4-4-4 (شهيق-احبس-زفير)
    ============================================================ */
+/* ============================================================
+   تسجيل جلسات التهدئة — مصدر واحد لكل الأنواع
+   ------------------------------------------------------------
+   كان السجل يقتصر على تمارين التنفّس رغم اسمه "سجل التهدئة"، فيُقصي
+   نشاط تهدئة حقيقي يقوم به المستخدم (الاسترخاء الصوتي، ومازج الأصوات
+   بمؤقّت). حقل type يميّز المصدر مع إبقاء توافق كامل مع السجلات القديمة
+   التي لا تحمله (تُعامَل كـ"breath" لأنها كانت الوحيدة الممكنة وقتها).
+   ============================================================ */
+function recordCalmSession(type, meta){
+  const sessions = Store.get("breatheSessions", []);
+  sessions.push(Object.assign({ type: type||"breath", ts: new Date().toISOString() }, meta||{}));
+  Store.set("breatheSessions", sessions.slice(-30));
+  app.touchJourneyDay();
+}
+
 const breathe = {
   timer:null, cycle:0, maxCycles:5, wakeLock:null,
 
@@ -4045,14 +4263,7 @@ const breathe = {
     // سجّل البيانات
     const mins = Store.get("calmMinutes",0) + 2;
     Store.set("calmMinutes", mins);
-    const sessions = Store.get("breatheSessions",[]);
-    const now = new Date();
-    sessions.push({
-      cycles: this.maxCycles,
-      ts: now.toISOString()
-    });
-    Store.set("breatheSessions", sessions.slice(-30));
-    app.touchJourneyDay();
+    recordCalmSession("breath", { cycles: this.maxCycles });
     app.growTree();
     setTimeout(()=>this.stop(), 3500);
   },
@@ -4186,32 +4397,122 @@ const usualWake = {
 
 // إدارة واجهة إعدادات الذكاء الاصطناعي الاختيارية (BYOK)
 const aiSettings = {
+  // روابط ثابتة لصفحات الاستخدام/الفوترة الرسمية لكل مزوّد — لا يوجد استدعاء API
+  // موحّد يعيد "الرصيد بالدولار" مباشرة عبر مفتاح المستخدم العادي لدى أي منهم،
+  // فالرابط المباشر لصفحتهم الرسمية هو الخيار الصادق الوحيد المضمون الدقة.
+  BILLING_URLS:{
+    openai:"https://platform.openai.com/usage",
+    gemini:"https://aistudio.google.com/",
+    anthropic:"https://console.anthropic.com/"
+  },
   init(){
     const on = Store.get("aiEnabled", false);
     const toggle = document.getElementById("aiToggle"); if(toggle) toggle.checked = on;
     const fields = document.getElementById("aiConfigFields"); if(fields) fields.style.display = on?"block":"none";
     const provSel = document.getElementById("aiProviderSelect"); if(provSel) provSel.value = Store.get("aiProvider","openai");
     const keyInput = document.getElementById("aiApiKeyInput"); if(keyInput) keyInput.value = Store.get("aiApiKey","");
+    const modelInput = document.getElementById("aiModelInput"); if(modelInput) modelInput.value = Store.get("aiModelOverride","");
+    this.refreshModelPlaceholder();
     const result = document.getElementById("aiTestResult"); if(result) result.style.display="none";
+    this.refreshUsage();
+  },
+  refreshUsage(){
+    const el = document.getElementById("aiUsageCounter");
+    if(el){
+      const n = Store.get("aiUsageWeekCount", 0);
+      el.textContent = n===0
+        ? t("ai_usage_none")
+        : t("ai_usage_count")(n);
+    }
+    const link = document.getElementById("aiBillingLink");
+    if(link){
+      const provider = Store.get("aiProvider","openai");
+      link.href = this.BILLING_URLS[provider] || this.BILLING_URLS.openai;
+    }
+    const cnt = document.getElementById("aiHistoryCount");
+    if(cnt){
+      const h = Store.get("aiHistory", []);
+      cnt.textContent = h.length ? String(h.length) : "";
+    }
+  },
+  // اسم عرض مختصر للمزوّد — لا يعتمد على aiAdvisor.PROVIDERS مباشرة لتفادي أي
+  // ترابط هش لو تغيّرت تلك الوحدة، فبطاقات السجل يجب أن تبقى قابلة للعرض دوماً
+  PROVIDER_LABELS:{ openai:"OpenAI", gemini:"Google Gemini", anthropic:"Anthropic Claude" },
+  _fmtHistoryDate(ts){
+    const d=new Date(ts);
+    const datePart = d.toLocaleDateString(LANG==="ar"?"ar-SA":"en-US", {year:"numeric",month:"short",day:"numeric"});
+    const timePart = d.toLocaleTimeString(LANG==="ar"?"ar-SA":"en-US", {hour:"2-digit",minute:"2-digit"});
+    return datePart+" — "+timePart;
+  },
+  // تعقيم أساسي قبل الإدراج عبر innerHTML — النص قادم من رد مزوّد خارجي (AI)،
+  // فمن الحكمة عدم الوثوق بأنه خالٍ من رموز HTML مهما كانت الصياغة المطلوبة منه
+  _esc(s){
+    return String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  },
+  openHistory(){
+    const list = document.getElementById("aiHistoryList");
+    const history = Store.get("aiHistory", []);
+    if(list){
+      if(!history.length){
+        list.innerHTML = `<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">${t("ai_history_empty")}</p>`;
+      } else {
+        list.innerHTML = history.slice().reverse().map(entry=>`
+          <div style="background:var(--w04);border:1px solid var(--w1);border-radius:12px;padding:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:11px;color:var(--muted)">
+              <span>${this._esc(this._fmtHistoryDate(entry.ts))}</span>
+              <span style="background:var(--w08);padding:2px 8px;border-radius:99px">${this._esc(this.PROVIDER_LABELS[entry.provider]||entry.provider)}</span>
+            </div>
+            <p style="font-size:13px;font-weight:700;color:var(--text);margin:0 0 4px">${this._esc(entry.t)}</p>
+            ${entry.why?`<p style="font-size:12px;color:var(--muted);margin:0">${this._esc(entry.why)}</p>`:""}
+          </div>
+        `).join("");
+      }
+    }
+    document.getElementById("aiHistoryModal")?.classList.add("show");
+  },
+  closeHistory(){
+    document.getElementById("aiHistoryModal")?.classList.remove("show");
   },
   onToggle(input){
     Store.set("aiEnabled", input.checked);
     const fields = document.getElementById("aiConfigFields");
     if(fields) fields.style.display = input.checked ? "block" : "none";
   },
-  onProviderChange(sel){ Store.set("aiProvider", sel.value); },
+  onProviderChange(sel){
+    Store.set("aiProvider", sel.value);
+    // تجاوز النموذج خاص بمزوّد بعينه — الاحتفاظ به بعد تبديل المزوّد يُنتج
+    // استدعاءً بنموذج لا ينتمي للمزوّد الجديد إطلاقاً (فشل مضمون ومربك)
+    Store.set("aiModelOverride", "");
+    const modelInput = document.getElementById("aiModelInput"); if(modelInput) modelInput.value = "";
+    this.refreshModelPlaceholder();
+    this.refreshUsage();
+  },
+  // يعرض النموذج الافتراضي للمزوّد الحالي كنص إرشادي داخل الحقل الفارغ
+  refreshModelPlaceholder(){
+    const el = document.getElementById("aiModelInput");
+    if(!el) return;
+    const key = Store.get("aiProvider","openai");
+    const def = aiAdvisor.PROVIDERS[key] ? aiAdvisor.PROVIDERS[key].model : "";
+    el.placeholder = def;
+  },
   save(){
     const key = (document.getElementById("aiApiKeyInput")?.value || "").trim();
     if(!key){ toast(t("ai_key_missing")); return; }
+    if(!Validate.apiKeyLooksValid(key)){ toast(t("ai_key_invalid")); return; }
     Store.set("aiApiKey", key);
     Store.set("aiProvider", document.getElementById("aiProviderSelect")?.value || "openai");
+    Store.set("aiModelOverride", (document.getElementById("aiModelInput")?.value || "").trim());
     toast(t("ai_saved"));
   },
   clear(){
     Store.set("aiApiKey", "");
     Store.set("aiEnabled", false);
+    Store.set("aiModelOverride", "");
+    // ملاحظة: aiHistory (سجل التحليلات السابقة) لا يُمسَح هنا عمداً — حذف المفتاح
+    // يعني "توقّف عن استدعاءات جديدة"، لا "امحُ ما وُلِّد فعلياً وسبق أن دفعتَ ثمنه"
     const toggle=document.getElementById("aiToggle"); if(toggle) toggle.checked=false;
     const input=document.getElementById("aiApiKeyInput"); if(input) input.value="";
+    const modelInput=document.getElementById("aiModelInput"); if(modelInput) modelInput.value="";
     const fields=document.getElementById("aiConfigFields"); if(fields) fields.style.display="none";
     const result=document.getElementById("aiTestResult"); if(result) result.style.display="none";
     toast(t("ai_cleared"));
@@ -4224,11 +4525,16 @@ const aiSettings = {
     this.save();
     out.style.display = "block"; out.style.color = "var(--muted)";
     out.textContent = t("ai_testing");
-    // ملخص وهمي بسيط لاختبار الاتصال فقط — لا يُستخدم بيانات نوم حقيقية
-    const dummy = { hyp: LANG==="ar"?"اختبار اتصال":"connection test", conf:0.5, avgDur:420, wakeGap:30, r:0.3, n:5, key:"unstable" };
-    const result = await aiAdvisor.generateAdvice(dummy, LANG);
-    if(result){ out.style.color="var(--calm)"; out.textContent = "✅ " + t("ai_test_ok"); }
-    else { out.style.color="#ff8f8f"; out.textContent = "❌ " + t("ai_test_fail"); }
+    const result = await aiAdvisor.testConnection(LANG);
+    if(result.ok){
+      out.style.color="var(--calm)"; out.textContent = "✅ " + t("ai_test_ok");
+    } else {
+      out.style.color="#ff8f8f";
+      const statusPart = result.status ? ("HTTP "+result.status+" — ") : "";
+      // التلميح العملي أولاً (ماذا يفعل المستخدم)، ثم التفاصيل التقنية للتشخيص
+      const hintPart = result.hint ? (result.hint+"\n") : "";
+      out.textContent = "❌ " + t("ai_test_fail") + "\n" + hintPart + statusPart + (result.message || "");
+    }
   }
 };
 
@@ -4438,6 +4744,11 @@ const voiceGuide = {
   },
   _finish(){
     this.active=false; this._duck(false);
+    // يُسجَّل عند الاكتمال فقط لا عند البدء — جلسة أُوقفت في منتصفها ليست جلسة تهدئة
+    try{
+      Store.set("calmMinutes", Store.get("calmMinutes",0) + 3);
+      recordCalmSession("voice", { lines: this.queue.length });
+    }catch(e){}
     if(this._onDone) this._onDone();
   },
 
@@ -4510,6 +4821,7 @@ const mixer = {
     // ابدأ التشغيل تلقائياً إن لم يكن يعمل
     if(!this.playing) this.start();
     this.sleepTimerEnd = Date.now() + minutes*60*1000;
+    this.sleepTimerMinutes = minutes; // نحتفظ بها لتسجيل الجلسة عند اكتمالها
     if(cd) cd.style.display="flex";
     if(badge){ badge.style.display="inline-block"; badge.textContent=`${minutes} ${t("timer_min")}`; }
     this._tickTimer();
@@ -4519,6 +4831,15 @@ const mixer = {
     if(!this.sleepTimerEnd) return;
     const rem = this.sleepTimerEnd - Date.now();
     if(rem <= 0){
+      // اكتمال المؤقت = جلسة تهدئة فعلية تستحق التسجيل (بخلاف الإلغاء اليدوي)
+      try{
+        const mins = this.sleepTimerMinutes || 0;
+        if(mins > 0){
+          Store.set("calmMinutes", Store.get("calmMinutes",0) + mins);
+          recordCalmSession("sounds", { minutes: mins });
+        }
+      }catch(e){}
+      this.sleepTimerMinutes = 0;
       // انتهى الوقت — أوقف الأصوات بشكل تدريجي
       this._fadeOut();
       return;
@@ -4728,7 +5049,7 @@ const courses = {
       if(!el) return;
       el.innerHTML = ids.map(id=>{
         const isDone = done.includes(id);
-        return `<div class="course-item ${isDone?"done":""}" onclick="courses.open('${id}')">
+        return `<div class="course-item ${isDone?"done":""}" onclick="courses.open('${id}')" role="button" tabindex="0">
           <div class="course-ico">${isDone?"✅":"📖"}</div>
           <div class="course-txt">
             <b>${t(id+"_title")}</b>
@@ -4800,10 +5121,10 @@ const quickBreath = {
     const ph  = document.getElementById("qbPhase");
     const ct  = document.getElementById("qbCount");
     const btn = document.getElementById("qbStartBtn");
-    const orb = document.getElementById("qbOrb");
+    const lungs = document.getElementById("qbLungs");
     if(ph)  ph.textContent = t(pattern==="478" ? "pattern_478_name" : "pattern_box_name");
     if(ct)  ct.textContent = "";
-    if(orb) orb.classList.remove("in");
+    if(lungs) lungs.classList.remove("in");
     if(btn){ btn.style.display="block"; btn.textContent=t("qb_start"); }
     if(overlay) overlay.classList.add("show");
   },
@@ -4814,19 +5135,22 @@ const quickBreath = {
   },
   phase(p){
     const cfg = this.PATTERNS[this.pattern];
-    const orb = document.getElementById("qbOrb");
+    const lungs = document.getElementById("qbLungs");
     const ph  = document.getElementById("qbPhase");
     clearTimeout(this.timer);
     if(p==="in"){
-      if(ph) ph.textContent=t("qb_in"); if(orb) orb.classList.add("in");
+      if(ph) ph.textContent=t("qb_in"); if(lungs) lungs.classList.add("in");
+      voiceGuide.cue(t("qb_in"));
       this.countdown(cfg.in);
       this.timer=setTimeout(()=>this.phase("hold"), cfg.in*1000);
     } else if(p==="hold"){
       if(ph) ph.textContent=t("qb_hold");
+      voiceGuide.cue(t("qb_hold"));
       this.countdown(cfg.hold);
       this.timer=setTimeout(()=>this.phase("out"), cfg.hold*1000);
     } else if(p==="out"){
-      if(ph) ph.textContent=t("qb_out"); if(orb) orb.classList.remove("in");
+      if(ph) ph.textContent=t("qb_out"); if(lungs) lungs.classList.remove("in");
+      voiceGuide.cue(t("qb_out"));
       this.countdown(cfg.out);
       this.timer=setTimeout(()=>{
         if(this.pattern==="box"){ this.phase("hold2"); }
@@ -4834,6 +5158,7 @@ const quickBreath = {
       }, cfg.out*1000);
     } else if(p==="hold2"){
       if(ph) ph.textContent=t("qb_hold");
+      voiceGuide.cue(t("qb_hold"));
       this.countdown(cfg.hold2);
       this.timer=setTimeout(()=>this._nextCycle(), cfg.hold2*1000);
     }
@@ -4859,6 +5184,7 @@ const quickBreath = {
   },
   stop(){
     clearTimeout(this.timer); this.timer=null;
+    voiceGuide.stop(true);
     const overlay=document.getElementById("quickBreathOverlay");
     if(overlay) overlay.classList.remove("show");
   }
@@ -4866,7 +5192,9 @@ const quickBreath = {
 
 /* ============================================================
    v1.3 — تصوّر موجّه (Guided Visualization)
-   نصوص متتابعة بتوقيت ثابت — بدون أي ملفات صوت أو صور خارجية
+   نصوص متتابعة بتوقيت ثابت، تُنطَق الآن عبر voiceGuide (speechSynthesis
+   المدمج في المتصفح) — لا ملفات صوت خارجية، اتساقاً مع تعليمات النطق
+   في بقية التطبيق (تمارين التنفّس، الاسترخاء الموجّه بالصوت)
    ============================================================ */
 const visualize = {
   timer:null, idx:0, current:null,
@@ -4887,8 +5215,10 @@ const visualize = {
     const lines=this.scripts[this.current];
     const txt=document.getElementById("vizText");
     const bar=document.getElementById("vizProgressBar");
-    if(txt) txt.textContent = t(lines[this.idx]);
+    const line = t(lines[this.idx]);
+    if(txt) txt.textContent = line;
     if(bar) bar.style.width = `${((this.idx+1)/lines.length)*100}%`;
+    voiceGuide.cue(line);
     const secs = (this.perLine[this.current]||45)*1000;
     if(this.idx>=lines.length-1){
       this.timer=setTimeout(()=>this.finish(), secs);
@@ -4905,6 +5235,7 @@ const visualize = {
   },
   stop(){
     clearTimeout(this.timer); this.timer=null;
+    voiceGuide.stop(true);
     const overlay=document.getElementById("vizOverlay");
     if(overlay) overlay.classList.remove("show");
   }
@@ -5076,10 +5407,16 @@ const app = {
   bindMoods(){
     document.querySelectorAll("#moodGrid .mood").forEach(b=>{
       b.onclick=()=>{
-        document.querySelectorAll("#moodGrid .mood").forEach(x=>x.classList.remove("sel"));
+        const val = Validate.ratingInList(b.dataset.m, [1,2,3,4,5], null);
+        if(val===null) return; // قيمة فاسدة — لا نُسجِّل شيئاً بدل تخزين رقم غير متوقَّع
+        document.querySelectorAll("#moodGrid .mood").forEach(x=>{
+          x.classList.remove("sel");
+          x.setAttribute("aria-pressed","false");
+        });
         b.classList.add("sel");
+        b.setAttribute("aria-pressed","true");
         const today=new Date().toISOString().slice(0,10);
-        const moods=Store.get("moods",{}); moods[today]=+b.dataset.m; Store.set("moods",moods);
+        const moods=Store.get("moods",{}); moods[today]=val; Store.set("moods",moods);
         this.touchJourneyDay();
         toast(t("toast_mood"));
         const pd=document.getElementById("pulseDone");
@@ -5312,9 +5649,9 @@ const app = {
   },
   closeSleepLog(){ const m=document.getElementById("sleepLogModal"); if(m) m.classList.remove("show"); },
   saveSleepLog(){
-    const bed=document.getElementById("logBedTime")?.value||"23:00";
-    const wake=document.getElementById("logWakeTime")?.value||"06:00";
-    const feel=+([...document.querySelectorAll(".wf-btn.sel")][0]?.dataset.v||4);
+    const bed=Validate.time(document.getElementById("logBedTime")?.value, "23:00");
+    const wake=Validate.time(document.getElementById("logWakeTime")?.value, "06:00");
+    const feel=Validate.ratingInList([...document.querySelectorAll(".wf-btn.sel")][0]?.dataset.v, [1,2,3,4,5], 4);
     const today=new Date().toISOString().slice(0,10);
     const logs=Store.get("sleepLogs",{});
     logs[today]={bed,wake,feel};
@@ -5423,7 +5760,10 @@ const app = {
   },
   renderSleepBars(){
     const bars=document.getElementById("sleepBars"); if(!bars) return;
-    const moods=Store.get("moods",{});
+    // مصدر البيانات الصحيح هنا هو شعور ما بعد الاستيقاظ (sleepLogs[date].feel)
+    // لا المزاج اليومي العام (moods) — كانت البطاقة تقرأ من moods خطأً، فتعرض
+    // نسخة مطابقة حرفياً لبطاقة "مزاجك هذا الأسبوع" في رحلتي رغم اختلاف عنوانها
+    const sleepLogs=Store.get("sleepLogs",{});
     const dayNames = LANG==="ar" ? t("week_full") : t("week_days");
     const today=new Date();
     let total=0, count=0;
@@ -5433,7 +5773,7 @@ const app = {
     for(let i=6;i>=0;i--){
       const d=new Date(today); d.setDate(today.getDate()-i);
       const key=d.toISOString().slice(0,10);
-      const val=moods[key]||0;
+      const val=(sleepLogs[key] && sleepLogs[key].feel) || 0;
       if(val){total+=val;count++;}
       const bar=document.createElement("div");
       bar.className="sleep-bar"+(val?"":" empty");
@@ -5501,14 +5841,23 @@ const app = {
           }
           return s.date || ""; // fallback لجلسات قديمة جداً بلا ts
         };
-        log.innerHTML=sessions.slice(-7).reverse().map(s=>`
+        // السجلات القديمة بلا حقل type كانت كلها تمارين تنفّس (الوحيدة الممكنة وقتها)
+        const meta = {
+          breath: { ico:"🫁", label:()=>t("calm_type_breath"), detail:s=>(s.cycles||5)+"" },
+          voice:  { ico:"🎧", label:()=>t("calm_type_voice"),  detail:()=>"" },
+          sounds: { ico:"🌊", label:()=>t("calm_type_sounds"), detail:s=>s.minutes?s.minutes+t("timer_min"):"" },
+        };
+        log.innerHTML=sessions.slice(-7).reverse().map(s=>{
+          const m = meta[s.type] || meta.breath;
+          return `
           <div class="calm-log-row">
             <div>
-              <div style="font-weight:600">${t("breath_done_t")}</div>
+              <div style="font-weight:600">${m.label()}</div>
               <div class="calm-log-date">${fmtDate(s)}</div>
             </div>
-            <div class="calm-log-cycles">${s.cycles||5} 🫁</div>
-          </div>`).join("");
+            <div class="calm-log-cycles">${m.detail(s)} ${m.ico}</div>
+          </div>`;
+        }).join("");
       }
     }
 
@@ -5517,6 +5866,8 @@ const app = {
       SleepAnalysis.init();
       const c=document.getElementById("ddaCard");
       if(c && c.dataset.open==="true") SleepAnalysis.render();
+      // عدّاد زر السجل انتقل لهذا التبويب، فيجب تحديثه هنا لا في الإعدادات فقط
+      aiSettings.refreshUsage();
     }catch(e){ console.warn("SleepAnalysis:", e); }
   },
 
@@ -5596,7 +5947,9 @@ const app = {
 
   // ── مقارنة جلسات التنفّس: هذا الأسبوع vs الماضي ──
   renderSessionsCompare(){
-    const sessions = Store.get("breatheSessions",[]);
+    // هذه البطاقة عنوانها "جلسات التنفّس" تحديداً، فتحسب نوع التنفّس فقط —
+    // بينما "سجل التهدئة" أدناه يعرض كل الأنواع (تنفّس، صوت مرشد، مازج أصوات)
+    const sessions = Store.get("breatheSessions",[]).filter(s=>!s.type || s.type==="breath");
     const now = new Date();
 
     const startOfWeek = (offset)=>{
@@ -5866,17 +6219,29 @@ const weeklyReport = {
       const x=startX+i*(cardW+gap);
       ctx.fillStyle='rgba(255,255,255,.06)';
       roundRect(ctx,x,y,cardW,cardH,14); ctx.fill();
+      // مهم: نُعيد ضبط fillStyle قبل رسم الإيموجي — بدونه يُرسَم بشفافية خلفية
+      // البطاقة نفسها (6٪) فيظهر باهتاً شبه مختفٍ في الصورة المُصدَّرة
+      ctx.fillStyle='#fff';
       ctx.font='28px Arial'; ctx.fillText(s.ico, x+cardW/2, y+38);
-      ctx.font='800 22px Cairo, Arial, sans-serif'; ctx.fillStyle='#fff';
+      ctx.font='800 22px Cairo, Arial, sans-serif';
       ctx.fillText(String(s.val), x+cardW/2, y+68);
-      ctx.font='500 11px Cairo, Arial, sans-serif'; ctx.fillStyle='rgba(255,255,255,.55)';
+      ctx.font='500 11px Cairo, Arial, sans-serif'; ctx.fillStyle='rgba(255,255,255,.65)';
       ctx.fillText(s.lbl, x+cardW/2, y+90);
     });
 
     // مخطط المزاج البسيط
-    const chartY = 260, chartH = 100, barW = 28, barGap=12;
+    const chartY = 258, chartH = 90, barW = 26, barGap=19;
     const chartStartX = (W - (barW*7 + barGap*6))/2;
-    const dayLetters = isAr ? ['أ','ن','ث','ر','خ','ج','س'] : ['S','M','T','W','T','F','S'];
+    // عنوان توضيحي فوق المخطط — بدونه لا يُفهَم موضوعه لمن يراه لأول مرة
+    ctx.font='700 12px Cairo, Arial, sans-serif';
+    ctx.fillStyle='rgba(255,255,255,.85)';
+    ctx.fillText(isAr?'مزاجك خلال الأسبوع':'Your mood this week', W/2, chartY-16);
+    // العربية لا تُختصَر أسماء أيامها (لا عرف راسخ لذلك، والتقطيع يبدو خطأً إملائياً)
+    // فنعرضها كاملة بلا "ال" التعريف بخط أصغر ومسافات أوسع؛ الإنجليزية تستخدم
+    // اختصاراتها القياسية المتعارف عليها
+    const dayNames = isAr
+      ? ['أحد','إثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت']
+      : ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     weekKeys.forEach((k,i)=>{
       const val = moods[k]||0;
       const h = val ? Math.round((val/5)*chartH)+8 : 6;
@@ -5885,21 +6250,50 @@ const weeklyReport = {
       grad.addColorStop(0,'#6D5DF6'); grad.addColorStop(1,'#00D4FF');
       ctx.fillStyle = val ? grad : 'rgba(255,255,255,.1)';
       roundRect(ctx,x,chartY+chartH-h,barW,h,6); ctx.fill();
-      ctx.font='600 11px Cairo, Arial, sans-serif'; ctx.fillStyle='rgba(255,255,255,.5)';
+      ctx.font=(isAr?'600 9px':'600 11px')+' Cairo, Arial, sans-serif';
+      ctx.fillStyle='rgba(255,255,255,.7)';
       const d=new Date(); d.setDate(d.getDate()-(6-i));
-      ctx.fillText(dayLetters[d.getDay()], x+barW/2, chartY+chartH+20);
+      ctx.fillText(dayNames[d.getDay()], x+barW/2, chartY+chartH+20);
     });
+
+    // التحليل المحلي هو المصدر الأساسي الذي يعمل دائماً لكل مستخدم بصرف النظر
+    // عن تفعيل الذكاء الاصطناعي من عدمه — لا يعتمد فقط على aiHistory (فارغة
+    // لغالبية المستخدمين لأن BYOK اختياري بالكامل).
+    const nights = SleepAnalysis.clean();
+    const dx = SleepAnalysis.diagnose(nights);
+    const localTip = SleepAnalysis.coach(dx); // يُعيد نصاً دائماً حتى بلا بيانات كافية
+
+    // تحسين AI (إن وُجد فعلياً) يُفضَّل فوق التحليل المحلي، لا بديلاً عنه
+    const aiHistory = Store.get('aiHistory', []);
+    const aiTip = aiHistory.length ? aiHistory[aiHistory.length-1] : null;
+    const usingAI = !!(aiTip && aiTip.t);
+    const displayTip = usingAI ? aiTip : localTip;
+
+    let quoteY = H-70;
+    if(displayTip && displayTip.t){
+      const boxX=24, boxY=chartY+chartH+45, boxW=W-48;
+      ctx.font='500 12px Cairo, Arial, sans-serif';
+      const lines = wrapCanvasText(ctx, displayTip.t, boxW-28).slice(0,4);
+      const boxH = 34 + lines.length*19;
+      ctx.fillStyle='rgba(109,93,246,.14)';
+      roundRect(ctx,boxX,boxY,boxW,boxH,14); ctx.fill();
+      ctx.font='600 10px Cairo, Arial, sans-serif';
+      ctx.fillStyle='rgba(0,212,255,.9)';
+      const labelText = usingAI
+        ? (isAr?'✨ خطوة هذا الأسبوع':'✨ This week\'s step')
+        : (isAr?'📊 خطوة هذا الأسبوع':'📊 This week\'s step');
+      ctx.fillText(labelText, W/2, boxY+20);
+      ctx.font='500 12px Cairo, Arial, sans-serif';
+      ctx.fillStyle='rgba(255,255,255,.92)';
+      lines.forEach((ln,i)=> ctx.fillText(ln, W/2, boxY+42+i*19));
+      quoteY = Math.max(boxY+boxH+34, H-70);
+    }
 
     // اقتباس تحفيزي أسفل
     ctx.font='italic 500 13px Cairo, Arial, sans-serif';
     ctx.fillStyle='rgba(196,181,253,.85)';
     const quote = isAr ? '"النوم يبدأ قبل أن تُغمض عينيك"' : '"Sleep begins before you close your eyes"';
-    ctx.fillText(quote, W/2, H-70);
-
-    // Footer
-    ctx.font='600 11px Cairo, Arial, sans-serif';
-    ctx.fillStyle='rgba(255,255,255,.35)';
-    ctx.fillText('dreamdriftai.netlify.app', W/2, H-30);
+    ctx.fillText(quote, W/2, Math.min(quoteY, H-34));
 
     document.getElementById('weeklyReportModal').classList.add('show');
   },
@@ -5933,6 +6327,51 @@ const weeklyReport = {
   },
 };
 
+// يقسّم نصاً إلى أسطر لا يتجاوز أيٌّ منها العرض المتاح — Canvas لا يلتفّ تلقائياً
+// بخلاف HTML، فبدون هذا يخرج النص الطويل خارج حدود الصورة المُصدَّرة
+/* ============================================================
+   Validate — طبقة تحقق أساسية خفيفة الوزن (بلا Zod أو أي مكتبة خارجية)
+   للمدخلات التي تُخزَّن أو تُستخدَم لاحقاً في حسابات (وقت، تقييم رقمي)،
+   حيث قيمة فاسدة قد تُنتج NaN صامتاً في تحليلات لاحقة بدل رفضها فوراً.
+   ============================================================ */
+const Validate = {
+  // "HH:MM" بصيغة صحيحة فعلياً (00-23 / 00-59) — لا نمطاً شكلياً فقط
+  time(v, fallback){
+    if(typeof v!=="string" || !/^([01]\d|2[0-3]):([0-5]\d)$/.test(v)) return fallback;
+    return v;
+  },
+  // تقييم صحيح ضمن نطاق مغلق (يُستخدَم للمزاج 1-5 وشعور ما بعد النوم 1-5)
+  ratingInList(v, allowed, fallback){
+    const n = +v;
+    return (Number.isInteger(n) && allowed.includes(n)) ? n : fallback;
+  },
+  // فحص معقولية أساسي لمفتاح API — لا نتحقق من صيغة مزوّد بعينه (تختلف
+  // جذرياً بين OpenAI/Gemini/Anthropic)، فقط نرفض ما لا يمكن أن يكون مفتاحاً
+  // حقيقياً إطلاقاً (فارغ، قصير جداً كنتيجة لصق جزئي بالخطأ، أو طويل بشكل غير
+  // منطقي كنتيجة لصق محتوى خاطئ بالكامل).
+  apiKeyLooksValid(v){
+    const s = String(v||"").trim();
+    return s.length >= 10 && s.length <= 300 && !/\s/.test(s);
+  },
+};
+
+function wrapCanvasText(ctx, text, maxWidth){
+  const words = String(text||"").split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = "";
+  words.forEach(word=>{
+    const candidate = line ? line+" "+word : word;
+    if(ctx.measureText(candidate).width <= maxWidth){
+      line = candidate;
+    } else {
+      if(line) lines.push(line);
+      line = word;
+    }
+  });
+  if(line) lines.push(line);
+  return lines;
+}
+
 // مساعد رسم مستطيل بزوايا دائرية على Canvas
 function roundRect(ctx,x,y,w,h,r){
   ctx.beginPath();
@@ -5943,6 +6382,18 @@ function roundRect(ctx,x,y,w,h,r){
   ctx.arcTo(x,y,x+w,y,r);
   ctx.closePath();
 }
+
+/* تفعيل Enter/Space لأي عنصر role="button" ليس زر <button> حقيقياً — عناصر
+   div التفاعلية (بطاقات، صفوف إعدادات قابلة للنقر) قابلة للتركيز الآن عبر
+   tabindex، لكنها لا تستجيب تلقائياً لمفاتيح التفعيل كما تفعل أزرار <button>
+   الحقيقية؛ معالج عام واحد هنا أفضل من تكرار onkeydown على كل عنصر (١٦+
+   موضعاً)، ويعمل تلقائياً لأي عنصر role=button يُضاف مستقبلاً كذلك. */
+document.addEventListener("keydown", function(e){
+  if((e.key==="Enter" || e.key===" ") && e.target && e.target.getAttribute && e.target.getAttribute("role")==="button" && e.target.tagName!=="BUTTON"){
+    e.preventDefault();
+    e.target.click();
+  }
+});
 
 const dataManager = {
 
@@ -6207,17 +6658,32 @@ async function rescheduleNotificationsIfEnabled(){
    • فشل صامت دائماً: أي خطأ (لا اتصال، مفتاح خاطئ، حظر CORS، انتهاء
      مهلة) يُعيد null فيبقى النص المحلي كما هو — الميزة تحسينية بحتة.
    ============================================================ */
+// عدّاد استخدام محلي بحت (لا يعتمد على أي واجهة مزوّد) — يُصفَّر كل 7 أيام،
+// يمنح المستخدم رؤية شفافة لعدد المرات الفعلية التي استُدعي فيها مفتاحه هذا الأسبوع
+function recordAIUsage(){
+  const DAY = 86400000;
+  const start = Store.get("aiUsageWeekStart", 0);
+  const now = Date.now();
+  if(!start || (now - start) >= 7*DAY){
+    Store.set("aiUsageWeekStart", now);
+    Store.set("aiUsageWeekCount", 1);
+  } else {
+    Store.set("aiUsageWeekCount", Store.get("aiUsageWeekCount", 0) + 1);
+  }
+  try{ aiSettings.refreshUsage(); }catch(e){}
+}
+
 const aiAdvisor = {
   PROVIDERS: {
     openai: {
       label: "OpenAI (GPT)",
       model: "gpt-4o-mini",
-      buildRequest(apiKey, sys, user){
+      buildRequest(apiKey, sys, user, modelOverride){
         return {
           url: "https://api.openai.com/v1/chat/completions",
           headers: { "Content-Type":"application/json", "Authorization":"Bearer "+apiKey },
           body: JSON.stringify({
-            model: this.model,
+            model: modelOverride || this.model,
             messages: [{role:"system",content:sys},{role:"user",content:user}],
             max_tokens: 220, temperature: 0.7
           })
@@ -6227,10 +6693,14 @@ const aiAdvisor = {
     },
     gemini: {
       label: "Google Gemini",
-      model: "gemini-2.0-flash",
-      buildRequest(apiKey, sys, user){
+      // جوجل تُوقف إصدارات Gemini بوتيرة أسرع من أي كود مثبَّت (2.0-flash أُوقف في
+      // يونيو 2026، و2.5-flash أصبح غير متاح للمشاريع الجديدة بعده بقليل). الاسم
+      // المستعار الرسمي "-latest" يُشير دائماً لأحدث إصدار مستقر ويتحدّث تلقائياً
+      // من طرف جوجل، فلا يحتاج تعديلاً في كودنا مع كل إيقاف إصدار.
+      model: "gemini-flash-latest",
+      buildRequest(apiKey, sys, user, modelOverride){
         return {
-          url: "https://generativelanguage.googleapis.com/v1beta/models/"+this.model+":generateContent?key="+encodeURIComponent(apiKey),
+          url: "https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(modelOverride||this.model)+":generateContent?key="+encodeURIComponent(apiKey),
           headers: { "Content-Type":"application/json" },
           body: JSON.stringify({
             systemInstruction: { parts:[{text:sys}] },
@@ -6244,7 +6714,7 @@ const aiAdvisor = {
     anthropic: {
       label: "Anthropic Claude",
       model: "claude-haiku-4-5-20251001",
-      buildRequest(apiKey, sys, user){
+      buildRequest(apiKey, sys, user, modelOverride){
         return {
           url: "https://api.anthropic.com/v1/messages",
           headers: {
@@ -6255,7 +6725,7 @@ const aiAdvisor = {
             "anthropic-dangerous-direct-browser-access":"true"
           },
           body: JSON.stringify({
-            model: this.model, max_tokens: 220, system: sys,
+            model: modelOverride || this.model, max_tokens: 220, system: sys,
             messages: [{role:"user", content:user}]
           })
         };
@@ -6268,23 +6738,60 @@ const aiAdvisor = {
     return !!(Store.get("aiEnabled",false) && Store.get("aiProvider") && Store.get("aiApiKey"));
   },
 
+  // النموذج الفعّال: تجاوز يدوي من الإعدادات إن وُجد، وإلا الافتراضي المدمج.
+  // ضروري لأن المزوّدين (وجوجل خاصةً) يُوقفون أسماء النماذج بلا إشعار كافٍ،
+  // فيبقى للمستخدم مخرج فوري بلا انتظار تحديث للتطبيق نفسه.
+  activeModel(providerKey){
+    const key = providerKey || Store.get("aiProvider","openai");
+    const custom = (Store.get("aiModelOverride","") || "").trim();
+    return custom || (this.PROVIDERS[key] ? this.PROVIDERS[key].model : "");
+  },
+
   // ملخص آمن للإرسال — أرقام محسوبة فقط، لا سجلات نوم خام ولا تواريخ
   buildSummary(dx){
     if(!dx) return null;
-    return {
+    const DAY = 86400000;
+    const now = Date.now();
+
+    // مزاج آخر 7 أيام — رقم واحد فقط (متوسط)، لا قيم يومية ولا تواريخ
+    const moods = Store.get("moods", {});
+    let moodSum = 0, moodCount = 0;
+    Object.keys(moods).forEach(k=>{
+      const d = new Date(k).getTime();
+      if(!isNaN(d) && (now - d) <= 7*DAY){ moodSum += moods[k]; moodCount++; }
+    });
+
+    // جلسات التهدئة هذا الأسبوع — عدد صحيح واحد، لا تواريخ الجلسات
+    const sessions = Store.get("breatheSessions", []);
+    const calmThisWeek = sessions.filter(s=>{
+      if(!s.ts) return false;
+      const d = new Date(s.ts).getTime();
+      return !isNaN(d) && (now - d) <= 7*DAY;
+    }).length;
+
+    const summary = {
       hypothesis: dx.hyp,
       confidencePct: Math.round((dx.conf||0)*100),
       avgSleepHours: +((dx.avgDur||0)/60).toFixed(1),
       wakeGapMinutes: Math.round(dx.wakeGap||0),
       moodDurationCorrelation: +(dx.r||0).toFixed(2),
-      nightsAnalyzed: dx.n||0
+      nightsAnalyzed: dx.n||0,
+      // فئات أوسع لنصيحة تستحق تكلفتها — لا تزال أرقاماً مُشتقة مفردة، بنفس
+      // انضباط الحقول أعلاه: لا سجلات خام، لا تواريخ، لا قيم يومية فردية
+      calmSessionsThisWeek: calmThisWeek,
+      currentStreakDays: Store.get("journeyDays", []).length
     };
+    if(moodCount) summary.avgMoodThisWeek = +(moodSum/moodCount).toFixed(1);
+    return summary;
   },
 
   systemPrompt(lang){
+    // المستخدم يدفع فعلياً مقابل كل استدعاء بمفتاحه الخاص، فالتوجيه يُلزم النموذج
+    // بالاستشهاد بالأرقام المُعطاة وربط الفئات ببعضها — نصيحة عامة كـ"نم مبكراً"
+    // كان يمكن توليدها محلياً بلا تكلفة، فلا تستحق ثمناً.
     return lang==="ar"
-      ? "أنت مدرّب نوم مقتضب ومتعاطف. بناءً على الملخص الرقمي المُعطى فقط — لا تطلب مزيداً من البيانات ولا تخترع أرقاماً جديدة — اكتب نصيحة عملية واحدة (جملة إلى جملتين) وسبباً موجزاً (جملة واحدة). لا تُشخّص حالة طبية، ولا تستخدم لغة إنذارية أو تنويمية. أجب حصراً بصيغة JSON: {\"tip\":\"...\",\"why\":\"...\"}"
-      : "You are a concise, empathetic sleep coach. Using only the given numeric summary — do not ask for more data or invent new numbers — write one practical tip (1-2 sentences) and a brief reason (1 sentence). Do not diagnose a medical condition or use alarming/hypnotic language. Reply strictly as JSON: {\"tip\":\"...\",\"why\":\"...\"}";
+      ? "أنت مدرّب عافية ونوم مقتضب ومتعاطف. لديك ملخص رقمي عن نوم المستخدم ومزاجه وجلسات تهدئته وسلسلة التزامه. اكتب نصيحة عملية واحدة محدّدة جداً (جملة إلى جملتين) وسبباً موجزاً (جملة واحدة). إلزامي: استشهد برقم واحد على الأقل من الملخص حرفياً داخل نصّك، واربط بين فئتين مختلفتين إن سمحت الأرقام (مثل المزاج مع التهدئة، أو النوم مع السلسلة). ممنوع منعاً باتاً: النصائح العامة المعروفة مسبقاً (مثل 'نم مبكراً' أو 'استرخِ أكثر') بلا ربط رقمي، وطلب بيانات إضافية، واختراع أرقام غير موجودة، والتشخيص الطبي، واللغة الإنذارية أو التنويمية. أجب حصراً بصيغة JSON: {\"tip\":\"...\",\"why\":\"...\"}"
+      : "You are a concise, empathetic wellbeing and sleep coach. You are given a numeric summary of the user's sleep, mood, calm sessions, and streak. Write one highly specific practical tip (1-2 sentences) and a brief reason (1 sentence). Required: cite at least one number from the summary verbatim in your text, and connect two different categories when the numbers allow (e.g. mood with calm sessions, or sleep with streak). Strictly forbidden: generic well-known advice (like 'sleep earlier' or 'relax more') without a numeric link, asking for more data, inventing numbers not present, medical diagnosis, and alarming or hypnotic language. Reply strictly as JSON: {\"tip\":\"...\",\"why\":\"...\"}";
   },
 
   async generateAdvice(dx, lang){
@@ -6297,7 +6804,7 @@ const aiAdvisor = {
     if(!apiKey) return null;
 
     try{
-      const req = provider.buildRequest(apiKey, this.systemPrompt(lang), JSON.stringify(summary));
+      const req = provider.buildRequest(apiKey, this.systemPrompt(lang), JSON.stringify(summary), this.activeModel());
       const controller = new AbortController();
       const timer = setTimeout(()=>controller.abort(), 12000);
       let res;
@@ -6312,10 +6819,53 @@ const aiAdvisor = {
       if(!raw) return null;
       const cleaned = raw.replace(/```json|```/g,"").trim();
       const parsed = JSON.parse(cleaned);
-      if(!parsed.tip) return null;
+      // تحقق من النوع لا الوجود فقط: لو أعاد المزوّد كائناً أو رقماً بدل نص
+      // (خلل في المزوّد، أو رد غير متوقَّع)، سيُعرَض مشوَّهاً كـ"[object Object]"
+      // بدل رفضه بأمان والإبقاء على النص المحلي كما هو.
+      if(typeof parsed.tip !== "string" || !parsed.tip.trim()) return null;
+      if(parsed.why !== undefined && typeof parsed.why !== "string") return null;
       return { t: parsed.tip, why: parsed.why || "" };
     }catch(e){
       return null; // فشل صامت بتصميم — التحليل المحلي يبقى هو المعروض
+    }
+  },
+
+  // تشخيص يدوي فعلي (زر "اختبار الاتصال") — بخلاف generateAdvice التي تفشل
+  // بصمت عمداً، هذه تُعيد تفصيل الخطأ الحقيقي (رمز HTTP ونص رد المزوّد) بدل
+  // "فشل الاتصال" العامة — وهذا بالضبط ما كان سيكشف فوراً أن نموذج Gemini
+  // القديم أُوقف من جوجل، بدل الاعتماد على بحث خارجي لتشخيصه.
+  async testConnection(lang){
+    if(!this.isConfigured()) return { ok:false, message:"لم يُفعَّل المزوّد أو المفتاح بعد" };
+    const provider = this.PROVIDERS[Store.get("aiProvider")];
+    const apiKey = Store.get("aiApiKey");
+    const dummy = { hypothesis:"اختبار اتصال", confidencePct:50, avgSleepHours:7, wakeGapMinutes:30, moodDurationCorrelation:0.3, nightsAnalyzed:5 };
+    try{
+      const req = provider.buildRequest(apiKey, this.systemPrompt(lang), JSON.stringify(dummy), this.activeModel());
+      const controller = new AbortController();
+      const timer = setTimeout(()=>controller.abort(), 12000);
+      let res;
+      try{
+        res = await fetch(req.url, { method:"POST", headers:req.headers, body:req.body, signal:controller.signal });
+      } finally {
+        clearTimeout(timer);
+      }
+      if(!res.ok){
+        let detail = "";
+        try{ detail = (await res.text()).slice(0,180); }catch(e){}
+        // رسائل عملية تُميّز الأسباب الشائعة بدل عرض نص المزوّد الخام فقط —
+        // 404 و429 يبدوان متطابقين للمستخدم ("فشل") رغم أن حلّيهما مختلفان تماماً
+        let hint = "";
+        if(res.status === 404) hint = t("ai_err_model");
+        else if(res.status === 429) hint = t("ai_err_rate");
+        else if(res.status === 401 || res.status === 403) hint = t("ai_err_auth");
+        return { ok:false, status:res.status, hint, message: detail || res.statusText || ("HTTP "+res.status) };
+      }
+      const json = await res.json();
+      const raw = provider.parse(json);
+      if(!raw) return { ok:false, message:"رد غير متوقَّع من المزوّد — لعلّ صيغة الاستجابة تغيّرت" };
+      return { ok:true };
+    }catch(e){
+      return { ok:false, message: e?.message || String(e) };
     }
   }
 };
