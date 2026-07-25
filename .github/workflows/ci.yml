@@ -35,11 +35,13 @@ jobs:
       - name: تشغيل حزمة الاختبارات (247 اختباراً)
         run: npm test
 
-      - name: فحص أن لا ملفات PWA مفقودة (manifest.json و sw.js)
+      - name: فحص أن لا ملفات PWA مفقودة (manifest.json و sw.js و.nojekyll)
         run: |
           test -f manifest.json || (echo "::error::manifest.json مفقود" && exit 1)
           test -f sw.js || (echo "::error::sw.js مفقود" && exit 1)
           test -d icons || (echo "::error::مجلد icons مفقود" && exit 1)
+          test -f .nojekyll || (echo "::error::.nojekyll مفقود — بدونه تُستبعَد مجلدات مثل .well-known من النشر صمتاً (خلل حقيقي وُجد ميدانياً)" && exit 1)
+          test -f .well-known/assetlinks.json || (echo "::error::.well-known/assetlinks.json مفقود" && exit 1)
           echo "✅ كل ملفات PWA الأساسية موجودة"
 
   deploy:

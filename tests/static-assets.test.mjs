@@ -412,6 +412,11 @@ describe("الصفحات القانونية المستقلة (مطلوبة لت�
 });
 
 describe("أصول متجر جوجل بلاي (TWA) — manifest، assetlinks، أيقونة معتمة، صورة ترويجية", () => {
+  test(".nojekyll موجود في جذر المستودع — خلل ميداني حقيقي: غيابه أخفى .well-known بالكامل من نشر GitHub Pages صمتاً (Jekyll يستبعد المجلدات التي تبدأ بنقطة افتراضياً)", () => {
+    const p = path.join(ROOT, ".nojekyll");
+    assert.ok(fs.existsSync(p), ".nojekyll مفقود — GitHub Pages سيستبعد .well-known/ والمجلدات المشابهة صمتاً بدونه");
+  });
+
   // قراءة أبعاد ونوع لون PNG مباشرة من رأس IHDR (بلا أي مكتبة خارجية) —
   // Color type: 2=RGB بلا شفافية، 6=RGBA بشفافية. راجع مواصفة PNG الرسمية.
   function readPngHeader(filePath) {
