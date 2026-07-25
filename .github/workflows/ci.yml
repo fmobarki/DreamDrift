@@ -32,7 +32,7 @@ jobs:
         with:
           node-version: "22"
 
-      - name: تشغيل حزمة الاختبارات (71 اختباراً)
+      - name: تشغيل حزمة الاختبارات (247 اختباراً)
         run: npm test
 
       - name: فحص أن لا ملفات PWA مفقودة (manifest.json و sw.js)

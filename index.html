@@ -2252,6 +2252,13 @@ html[dir="ltr"] .dda-axis{margin:0 0 10px 42px}
           <p data-t="lp4_d">يمكنك حذف جميع بياناتك من الإعدادات ← إعادة ضبط التطبيق.</p>
         </div>
       </div>
+      <div class="legal-point">
+        <span class="legal-icon">🤖</span>
+        <div>
+          <b data-t="lp5_t">استثناء واحد صريح: الذكاء الاصطناعي الاختياري</b>
+          <p data-t="lp5_d">إذا فعّلت ميزة "تحليل بالذكاء الاصطناعي" الاختيارية بمفتاحك الخاص، يُرسَل ملخّص رقمي محسوب (لا سجلات نوم خام ولا تواريخ) مباشرة من جهازك إلى مزوّد الذكاء الاصطناعي الذي اخترته — لا يمرّ عبر أي خادم لنا. مُعطَّلة افتراضياً.</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2293,7 +2300,13 @@ html[dir="ltr"] .dda-axis{margin:0 0 10px 42px}
 
   <div class="legal-footer" style="text-align:center">
     <div class="legal-copy">© 2026 DreamDrift — جميع الحقوق محفوظة</div>
-    <div class="legal-ver" data-t="legal_updated">آخر تحديث: يونيو 2026</div>
+    <div class="legal-ver" data-t="legal_updated">آخر تحديث: يوليو 2026</div>
+    <div style="margin-top:14px;font-size:11px;color:var(--faint)">
+      <span data-t="legal_standalone_hint">روابط مستقلة للمشاركة خارج التطبيق:</span>
+      <a href="legal/privacy.html" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;margin-inline-start:6px">privacy.html</a>
+      ·
+      <a href="legal/terms.html" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline">terms.html</a>
+    </div>
   </div>
 </section>
 
@@ -3079,11 +3092,13 @@ const STR = {
     lp2_t:"لا نجمع أي بيانات", lp2_d:"لا نجمع ولا نبيع ولا نشارك أي معلومات شخصية. التطبيق لا يحتاج حساباً.",
     lp3_t:"الإشعارات المحلية", lp3_d:"إشعارات التهدئة والمنبّه تعمل محلياً على جهازك فقط.",
     lp4_t:"حذف البيانات", lp4_d:"يمكنك حذف جميع بياناتك من الإعدادات ← إعادة ضبط التطبيق.",
+    lp5_t:"استثناء واحد صريح: الذكاء الاصطناعي الاختياري", lp5_d:"إذا فعّلت ميزة \"تحليل بالذكاء الاصطناعي\" الاختيارية بمفتاحك الخاص، يُرسَل ملخّص رقمي محسوب (لا سجلات نوم خام ولا تواريخ) مباشرة من جهازك إلى مزوّد الذكاء الاصطناعي الذي اخترته (OpenAI أو Google أو Anthropic) — لا يمرّ عبر أي خادم لنا. هذه الميزة مُعطَّلة افتراضياً ولن يُرسَل أي شيء ما لم تُفعِّلها وتُدخل مفتاحك بنفسك.",
     lt1_t:"استخدام شخصي", lt1_d:"التطبيق مخصص للاستخدام الشخصي فقط. يُحظر استخدامه لأغراض تجارية دون إذن.",
     lt2_t:"ليس بديلاً طبياً", lt2_d:"DreamDrift أداة مساعدة للاسترخاء وليس تطبيقاً طبياً. استشر طبيبك لأي مشاكل في النوم.",
     lt3_t:"التحديثات", lt3_d:"نحتفظ بحق تحديث التطبيق وشروط الاستخدام. سيُعلَم المستخدمون بأي تغييرات جوهرية.",
     legal_contact_t:"تواصل معنا", legal_contact_d:"لأي استفسار أو ملاحظة حول الخصوصية أو الشروط",
-    legal_updated:"آخر تحديث: يونيو 2026",
+    legal_updated:"آخر تحديث: يوليو 2026",
+    legal_standalone_hint:"روابط مستقلة للمشاركة خارج التطبيق:",
     consent_text:"باستخدامك DreamDrift توافق على ", consent_ok:"موافق",
     tip4:"تجنّب الكافيين بعد الساعة 2 ظهراً", tip5:"تعرّض لضوء الشمس في الصباح يُحسّن النوم",
     week_days:["أحد","إثن","ثلث","أرب","خمس","جمع","سبت"],
@@ -3355,11 +3370,13 @@ const STR = {
     lp2_t:"We collect no data", lp2_d:"We do not collect, sell, or share any personal information. The app requires no account or email.",
     lp3_t:"Local notifications", lp3_d:"Wind-down and alarm notifications work locally on your device only.",
     lp4_t:"Delete your data", lp4_d:"You can delete all your data anytime from Settings → Reset App.",
+    lp5_t:"One explicit exception: optional AI analysis", lp5_d:"If you enable the optional \"AI-Powered Analysis\" feature with your own key, a computed numeric summary (no raw sleep logs or dates) is sent directly from your device to the AI provider you chose (OpenAI, Google, or Anthropic) — never through any server of ours. This feature is off by default and nothing is sent unless you enable it and enter your own key.",
     lt1_t:"Personal use", lt1_d:"The app is for personal use only. Commercial use without permission is prohibited.",
     lt2_t:"Not a medical substitute", lt2_d:"DreamDrift is a relaxation aid, not a medical app. Consult your doctor for any sleep disorders.",
     lt3_t:"Updates", lt3_d:"We reserve the right to update the app and terms. Users will be notified of any material changes.",
     legal_contact_t:"Contact us", legal_contact_d:"For any questions about privacy or terms",
-    legal_updated:"Last updated: June 2026",
+    legal_updated:"Last updated: July 2026",
+    legal_standalone_hint:"Standalone links for sharing outside the app:",
     consent_text:"By using DreamDrift you agree to our ", consent_ok:"Got it",
     tip4:"Avoid caffeine after 2 PM", tip5:"Morning sunlight improves sleep quality",
     week_days:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],

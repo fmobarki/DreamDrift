@@ -379,6 +379,89 @@ describe("manifest.json", () => {
   });
 });
 
+describe("الصفحات القانونية المستقلة (مطلوبة لتقديم التطبيق على المتاجر)", () => {
+  ["legal/privacy.html", "legal/privacy-en.html", "legal/terms.html", "legal/terms-en.html"].forEach((f) => {
+    test(`${f} موجودة وتحتوي DOCTYPE صحيحاً`, () => {
+      const p = path.join(ROOT, f);
+      assert.ok(fs.existsSync(p), `${f} غير موجود`);
+      const content = fs.readFileSync(p, "utf8");
+      assert.match(content, /^<!DOCTYPE html>/);
+      assert.match(content, /<html lang="(ar|en)"/);
+    });
+  });
+
+  test("رابط الصفحة المستقلة مُدرَج داخل التطبيق نفسه للاكتشاف والمشاركة", () => {
+    const html = readIndexHtml();
+    assert.match(html, /href="legal\/privacy\.html"/);
+    assert.match(html, /href="legal\/terms\.html"/);
+  });
+
+  test("سياسة الخصوصية داخل التطبيق تذكر صراحةً استثناء الذكاء الاصطناعي — لا تناقض مع 'لا نرسل بياناتك لأي خادم'", () => {
+    const html = readIndexHtml();
+    assert.match(html, /lp5_t:"استثناء واحد صريح: الذكاء الاصطناعي الاختياري"/);
+    assert.match(html, /lp5_d:"/);
+    assert.match(html, /OpenAI/);
+    assert.match(html, /Anthropic/);
+  });
+
+  test("الصفحة المستقلة (privacy.html) تذكر نفس استثناء الذكاء الاصطناعي أيضاً — لا فقط النسخة داخل التطبيق", () => {
+    const content = fs.readFileSync(path.join(ROOT, "legal/privacy.html"), "utf8");
+    assert.match(content, /الذكاء الاصطناعي/);
+    assert.match(content, /OpenAI/);
+  });
+});
+
+describe("أصول متجر جوجل بلاي (TWA) — manifest، assetlinks، أيقونة معتمة، صورة ترويجية", () => {
+  // قراءة أبعاد ونوع لون PNG مباشرة من رأس IHDR (بلا أي مكتبة خارجية) —
+  // Color type: 2=RGB بلا شفافية، 6=RGBA بشفافية. راجع مواصفة PNG الرسمية.
+  function readPngHeader(filePath) {
+    const buf = fs.readFileSync(filePath);
+    return {
+      width: buf.readUInt32BE(16),
+      height: buf.readUInt32BE(20),
+      colorType: buf.readUInt8(25),
+    };
+  }
+
+  test("manifest.json يحتوي id وcategories الموصى بهما لـTWA", () => {
+    const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.json"), "utf8"));
+    assert.ok(manifest.id);
+    assert.ok(Array.isArray(manifest.categories) && manifest.categories.length > 0);
+  });
+
+  test(".well-known/assetlinks.json موجود وبصيغة صحيحة (مصفوفة بحقول android_app المطلوبة)", () => {
+    const p = path.join(ROOT, ".well-known/assetlinks.json");
+    assert.ok(fs.existsSync(p));
+    const data = JSON.parse(fs.readFileSync(p, "utf8"));
+    assert.ok(Array.isArray(data));
+    assert.equal(data[0].target.namespace, "android_app");
+    assert.ok(data[0].target.sha256_cert_fingerprints);
+  });
+
+  test("icon-512-store.png معتمة تمامًا (color type=2 أي RGB بلا قناة شفافية) بأبعاد 512×512 — مطلوبة لقائمة المتجر", () => {
+    const p = path.join(ROOT, "icons/icon-512-store.png");
+    assert.ok(fs.existsSync(p), "أيقونة المتجر المعتمة غير موجودة");
+    const { width, height, colorType } = readPngHeader(p);
+    assert.equal(width, 512);
+    assert.equal(height, 512);
+    assert.equal(colorType, 2, "يجب أن تكون RGB (نوع 2) بلا قناة شفافية (لا 6=RGBA)");
+  });
+
+  test("feature-graphic.png بأبعاد 1024×500 القياسية لجوجل بلاي وبلا شفافية", () => {
+    const p = path.join(ROOT, "assets_store/feature-graphic.png");
+    assert.ok(fs.existsSync(p), "الصورة الترويجية غير موجودة");
+    const { width, height, colorType } = readPngHeader(p);
+    assert.equal(width, 1024);
+    assert.equal(height, 500);
+    assert.equal(colorType, 2);
+  });
+
+  test("PLAY_STORE_GUIDE.md وDATA_SAFETY_ANSWERS.md موجودان في جذر المستودع", () => {
+    assert.ok(fs.existsSync(path.join(ROOT, "PLAY_STORE_GUIDE.md")));
+    assert.ok(fs.existsSync(path.join(ROOT, "DATA_SAFETY_ANSWERS.md")));
+  });
+});
+
 describe("بنية المستودع", () => {
   ["index.html", "manifest.json", "sw.js", "README.md", "LICENSE", ".gitignore"].forEach((file) => {
     test(`الملف الجذري "${file}" موجود`, () => {
