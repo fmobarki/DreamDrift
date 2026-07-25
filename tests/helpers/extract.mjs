@@ -99,11 +99,19 @@ export function mockDocument() {
 
 /** Store وهمي بواجهة get/set/load مطابقة لواجهة Store الحقيقية في index.html */
 export function mockStore(initial = {}) {
-  const data = { ...initial };
   return {
-    _data: data,
-    get(k, d) { return k in data ? data[k] : d; },
-    set(k, v) { data[k] = v; },
+    // this.data مطابقة تماماً لواجهة Store الحقيقية في التطبيق (data:{} خاصية
+    // مباشرة). النسخة السابقة استخدمت متغيّراً مغلقاً منفصلاً (_data)، فكان أي
+    // كود مُختبَر يُعيد كتابة Store.data مباشرة (مثل dataManager.importFile) لا
+    // يُحدِّث الحالة الفعلية التي يقرأها get() — خلل اكتُشف ميدانياً عند اختبار
+    // الاستيراد بعد إضافة تشفير مفتاح الذكاء الاصطناعي.
+    data: { ...initial },
+    get(k, d) { return k in this.data ? this.data[k] : d; },
+    set(k, v) { this.data[k] = v; },
     load() {},
+    // save() كانت مفقودة تماماً — غيابها كان يجعل أي كود يستدعي Store.save()
+    // (مثل importFile بعد دمج البيانات) يرمي TypeError يُبتلَع صمتاً في أي
+    // catch خارجي، فيبدو الاستيراد "فاشلاً" رغم نجاح كل الخطوات قبله فعلياً.
+    save() {},
   };
 }

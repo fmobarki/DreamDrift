@@ -133,6 +133,15 @@ describe("السمة الفاتحة — أُلغيت نهائياً بقرار �
   });
 });
 
+describe("تنويه تشفير مفتاح الذكاء الاصطناعي في واجهة النسخ الاحتياطي", () => {
+  test("عنصر التنويه موجود بجانب صف بياناتك، بكلا اللغتين", () => {
+    const html = readIndexHtml();
+    assert.match(html, /data-t="backup_note_ai_key"/);
+    assert.match(html, /backup_note_ai_key:"مفتاح الذكاء الاصطناعي/);
+    assert.match(html, /backup_note_ai_key:"Your AI key/);
+  });
+});
+
 describe("Content-Security-Policy — سياسة خفيفة بلا هجرة onclick", () => {
   test("موجودة وتحتوي default-src 'self'", () => {
     const html = readIndexHtml();

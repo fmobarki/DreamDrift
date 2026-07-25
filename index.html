@@ -2179,6 +2179,10 @@ html[dir="ltr"] .dda-axis{margin:0 0 10px 42px}
       <span class="backup-note-ico">💡</span>
       <span data-t="backup_note">احتفظ بنسخة احتياطية قبل كل تحديث للتطبيق</span>
     </div>
+    <div class="backup-note">
+      <span class="backup-note-ico">🔒</span>
+      <span data-t="backup_note_ai_key">مفتاح الذكاء الاصطناعي (إن فعّلته) يُشفَّر دائماً بكلمة مرور تختارها وقت التصدير — لا يظهر أبداً بنص صريح في الملف.</span>
+    </div>
     <!-- آخر نسخة تلقائية -->
     <div class="last-backup-row" id="lastBackupRow" style="display:none">
       <span class="last-backup-ico">🟢</span>
@@ -2475,6 +2479,18 @@ html[dir="ltr"] .dda-axis{margin:0 0 10px 42px}
     <p class="modal-desc" data-t="ai_history_desc">يبقى محفوظاً على جهازك حتى بعد حذف المفتاح أو تبديل المزوّد.</p>
     <div id="aiHistoryList" style="overflow-y:auto;flex:1;margin:10px 0;display:flex;flex-direction:column;gap:10px"></div>
     <button class="btn-primary ghost" onclick="aiSettings.closeHistory()" data-t="edit_cancel">إلغاء</button>
+  </div>
+</div>
+
+<!-- ===================== Export/Import Password Modal ===================== -->
+<div id="exportPwModal" class="modal-overlay">
+  <div class="modal">
+    <h2 id="exportPwTitle" data-t="export_pw_title">كلمة مرور لحماية مفتاحك</h2>
+    <p class="modal-desc" id="exportPwDesc" data-t="export_pw_desc">اختر كلمة مرور لتشفير مفتاح الذكاء الاصطناعي داخل النسخة الاحتياطية. لا تُحفَظ هذه الكلمة في أي مكان — احفظها أنت جيداً، فلا يمكن استرجاع المفتاح بدونها.</p>
+    <input type="password" id="exportPwInput" autocomplete="off" placeholder="••••••••" style="width:100%;box-sizing:border-box;background:var(--w06);color:var(--text);border:1px solid var(--w15);border-radius:10px;padding:12px;font-family:inherit;font-size:14px;direction:ltr;text-align:left">
+    <p id="exportPwError" style="display:none;color:#ff8f8f;font-size:12px;margin-top:8px"></p>
+    <button class="btn-primary" onclick="exportPw.confirm()" id="exportPwConfirmBtn" data-t="export_pw_confirm" style="margin-top:14px">متابعة</button>
+    <button class="btn-primary ghost" onclick="exportPw.cancel()" data-t="edit_cancel">إلغاء</button>
   </div>
 </div>
 
@@ -3035,9 +3051,18 @@ const STR = {
     export_title:"تصدير البيانات", export_sub:"حفظ نسخة JSON على جهازك",
     import_title:"استيراد البيانات", import_sub:"استعادة من نسخة احتياطية",
     backup_note:"احتفظ بنسخة احتياطية قبل كل تحديث للتطبيق",
+    backup_note_ai_key:"مفتاح الذكاء الاصطناعي (إن فعّلته) يُشفَّر دائماً بكلمة مرور تختارها وقت التصدير — لا يظهر أبداً بنص صريح في الملف.",
     cloud_title:"مزامنة سحابية — قادماً في 1.4", cloud_sub:"بياناتك محفوظة تلقائياً عبر أجهزتك",
     stat_moods:"أيام المزاج", stat_sessions:"جلسات التنفّس", stat_sleep:"سجلات النوم", stat_days:"أيام الرحلة",
     toast_exported:"تم تصدير البيانات ✓",
+    toast_export_cancelled:"أُلغي التصدير — لم يُحفَظ أي ملف",
+    toast_export_encrypt_err:"تعذّر تشفير المفتاح — حاول مجدداً",
+    toast_import_wrong_pw:"كلمة مرور خاطئة — استُورد كل شيء ما عدا مفتاح الذكاء الاصطناعي",
+    export_pw_title:"كلمة مرور لحماية مفتاحك",
+    export_pw_desc:"اختر كلمة مرور لتشفير مفتاح الذكاء الاصطناعي داخل النسخة الاحتياطية. لا تُحفَظ هذه الكلمة في أي مكان — احفظها أنت جيداً، فلا يمكن استرجاع المفتاح بدونها.",
+    import_pw_title:"أدخل كلمة مرور المفتاح",
+    import_pw_desc:"هذه النسخة الاحتياطية تحتوي مفتاح ذكاء اصطناعي مُشفَّراً. أدخل كلمة المرور التي استخدمتها وقت التصدير لاستعادته — أو تجاهل هذه الخطوة لاستيراد بقية بياناتك بلا المفتاح.",
+    export_pw_confirm:"متابعة", export_pw_required:"أدخل كلمة مرور أولاً",
     recovery_title:"وجدنا بياناتك!", recovery_msg:"يبدو أن بياناتك ضاعت. لديك نسخة احتياطية محفوظة:",
     recovery_restore:"استعادة بياناتي ✨", recovery_skip:"ابدأ من جديد",
     backup_history_title:"سجل النسخ الاحتياطية", backup_history_sub:"آخر 7 نسخ تلقائية على جهازك",
@@ -3302,9 +3327,18 @@ const STR = {
     export_title:"Export data", export_sub:"Save a JSON file to your device",
     import_title:"Import data", import_sub:"Restore from a backup file",
     backup_note:"Keep a backup before every app update",
+    backup_note_ai_key:"Your AI key (if enabled) is always encrypted with a password you choose at export time — it never appears in plain text in the file.",
     cloud_title:"Cloud sync — coming in v1.4", cloud_sub:"Your data backed up automatically across devices",
     stat_moods:"Mood days", stat_sessions:"Breathing sessions", stat_sleep:"Sleep logs", stat_days:"Journey days",
     toast_exported:"Data exported ✓",
+    toast_export_cancelled:"Export cancelled — no file was saved",
+    toast_export_encrypt_err:"Couldn't encrypt the key — try again",
+    toast_import_wrong_pw:"Wrong password — everything was imported except the AI key",
+    export_pw_title:"Password to protect your key",
+    export_pw_desc:"Choose a password to encrypt the AI key inside this backup. This password is never stored anywhere — keep it safe, the key cannot be recovered without it.",
+    import_pw_title:"Enter the key's password",
+    import_pw_desc:"This backup contains an encrypted AI key. Enter the password you used at export time to restore it — or skip this step to import the rest of your data without the key.",
+    export_pw_confirm:"Continue", export_pw_required:"Enter a password first",
     recovery_title:"We found your data!", recovery_msg:"Looks like your data was lost. We have a saved backup:",
     recovery_restore:"Restore my data ✨", recovery_skip:"Start fresh",
     backup_history_title:"Backup history", backup_history_sub:"Last 7 automatic backups on your device",
@@ -6395,6 +6429,97 @@ document.addEventListener("keydown", function(e){
   }
 });
 
+/* ============================================================
+   AIKeyCrypto — تشفير حقيقي لمفتاح الذكاء الاصطناعي في النسخ الاحتياطية
+   ------------------------------------------------------------
+   لأن التطبيق بلا خادم وكل الكود مرئي علناً، أي مفتاح تشفير مُضمَّن في
+   الكود نفسه يكون تشفيراً وهمياً (أي شخص يملك الملف يستطيع فكّه بسهولة
+   قراءة الكود). الحل الوحيد الحقيقي: كلمة مرور يُدخلها المستخدم بنفسه وقت
+   التصدير (لا تُخزَّن أبداً في أي مكان)، تُشتَق منها مفتاح AES-256 فعلي عبر
+   PBKDF2 (250,000 تكرار — يقاوم تخمين كلمات المرور بالقوة الغاشمة). كل هذا
+   عبر Web Crypto API المدمجة في المتصفح — بلا مكتبة خارجية.
+   ============================================================ */
+const AIKeyCrypto = {
+  ITERATIONS: 250000,
+
+  _bufToB64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))); },
+  _b64ToBuf(b64){
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+    return bytes.buffer;
+  },
+
+  async _deriveKey(password, saltBytes, usage){
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey(
+      "raw", enc.encode(password), {name:"PBKDF2"}, false, ["deriveKey"]
+    );
+    return crypto.subtle.deriveKey(
+      {name:"PBKDF2", salt:saltBytes, iterations:this.ITERATIONS, hash:"SHA-256"},
+      keyMaterial,
+      {name:"AES-GCM", length:256},
+      false,
+      [usage]
+    );
+  },
+
+  // يُعيد {salt, iv, ciphertext} بصيغة base64 — كل هذا آمن للتخزين في JSON عادي
+  async encrypt(password, plaintext){
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv   = crypto.getRandomValues(new Uint8Array(12));
+    const key  = await this._deriveKey(password, salt, "encrypt");
+    const enc  = new TextEncoder();
+    const ciphertext = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, enc.encode(plaintext));
+    return { salt:this._bufToB64(salt), iv:this._bufToB64(iv), ciphertext:this._bufToB64(ciphertext) };
+  },
+
+  // يرمي خطأً لو كانت كلمة المرور خاطئة (AES-GCM يفشل التحقق تلقائياً) — هذا
+  // هو التصرّف الصحيح المطلوب، لا نعيد null بصمت لخطأ أمني بهذا الحجم
+  async decrypt(password, blob){
+    const salt = new Uint8Array(this._b64ToBuf(blob.salt));
+    const iv   = new Uint8Array(this._b64ToBuf(blob.iv));
+    const key  = await this._deriveKey(password, salt, "decrypt");
+    const ciphertext = this._b64ToBuf(blob.ciphertext);
+    const plainBuf = await crypto.subtle.decrypt({name:"AES-GCM", iv}, key, ciphertext);
+    return new TextDecoder().decode(plainBuf);
+  },
+};
+
+// نافذة كلمة مرور مشتركة للتصدير والاستيراد — Promise-based بحيث يستطيع
+// export()/importFile() انتظار إدخال المستخدم قبل المتابعة
+const exportPw = {
+  _resolve: null,
+  ask(mode){
+    const title = document.getElementById("exportPwTitle");
+    const desc = document.getElementById("exportPwDesc");
+    const err = document.getElementById("exportPwError");
+    const input = document.getElementById("exportPwInput");
+    if(input) input.value = "";
+    if(err) err.style.display = "none";
+    if(title) title.textContent = mode==="export" ? t("export_pw_title") : t("import_pw_title");
+    if(desc) desc.textContent = mode==="export" ? t("export_pw_desc") : t("import_pw_desc");
+    document.getElementById("exportPwModal")?.classList.add("show");
+    return new Promise((resolve)=>{ this._resolve = resolve; });
+  },
+  confirm(){
+    const pw = document.getElementById("exportPwInput")?.value || "";
+    if(!pw){
+      const err=document.getElementById("exportPwError");
+      if(err){ err.style.display="block"; err.textContent=t("export_pw_required"); }
+      return;
+    }
+    document.getElementById("exportPwModal")?.classList.remove("show");
+    const resolve=this._resolve; this._resolve=null;
+    if(resolve) resolve(pw);
+  },
+  cancel(){
+    document.getElementById("exportPwModal")?.classList.remove("show");
+    const resolve=this._resolve; this._resolve=null;
+    if(resolve) resolve(null);
+  },
+};
+
 const dataManager = {
 
   // عرض آخر نسخة في بطاقة البيانات
@@ -6482,7 +6607,28 @@ const dataManager = {
   },
 
   // تصدير — يُنشئ ملف JSON ويُنزّله
-  export(){
+  async export(){
+    // نُصدِّر نسخة مُصفَّاة لا Store.data الخام مباشرة — مفتاح الذكاء الاصطناعي
+    // حقل حسّاس يستحق معاملة مختلفة عن باقي البيانات (نوم، مزاج، تفضيلات)
+    const exportedData = Object.assign({}, Store.data);
+    const rawKey = exportedData.aiApiKey;
+    let aiKeyEncrypted = null;
+
+    if(rawKey){
+      const password = await exportPw.ask("export");
+      if(password === null){ toast(t("toast_export_cancelled")); return; } // ألغى المستخدم
+      try{
+        aiKeyEncrypted = await AIKeyCrypto.encrypt(password, JSON.stringify({
+          key: rawKey, model: exportedData.aiModelOverride || ""
+        }));
+      }catch(e){
+        toast(t("toast_export_encrypt_err"));
+        return;
+      }
+    }
+    delete exportedData.aiApiKey;
+    delete exportedData.aiModelOverride;
+
     const data = {
       meta:{
         app:     "DreamDrift",
@@ -6490,7 +6636,8 @@ const dataManager = {
         date:    new Date().toISOString(),
         device:  navigator.userAgent.slice(0,60),
       },
-      data: Store.data
+      data: exportedData,
+      aiKeyEncrypted, // null إن لم يوجد مفتاح أصلاً — لا حقل فارغ مُضلِّل
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
     const url  = URL.createObjectURL(blob);
@@ -6512,7 +6659,7 @@ const dataManager = {
     const file = input.files[0];
     if(!file) return;
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try{
         const parsed = JSON.parse(e.target.result);
         // تحقق من صحة الملف
@@ -6534,7 +6681,25 @@ const dataManager = {
           const seen = new Set();
           merged.breatheSessions = all.filter(s=>{ const k=s.ts||s.date; return seen.has(k)?false:seen.add(k); });
         }
+
+        // مفتاح الذكاء الاصطناعي المُشفَّر (إن وُجد) — فشل كلمة المرور أو الإلغاء
+        // لا يجب أن يمنع استيراد بقية البيانات (نوم، مزاج) إطلاقاً
+        if(parsed.aiKeyEncrypted){
+          const password = await exportPw.ask("import");
+          if(password !== null){
+            try{
+              const decrypted = JSON.parse(await AIKeyCrypto.decrypt(password, parsed.aiKeyEncrypted));
+              merged.aiApiKey = decrypted.key;
+              if(decrypted.model) merged.aiModelOverride = decrypted.model;
+            }catch(e){
+              toast(t("toast_import_wrong_pw")); // نُكمل الاستيراد بلا المفتاح
+            }
+          }
+        }
+
+        console.log("DEBUG2 merged.aiApiKey before save:", merged.aiApiKey);
         Store.data = merged;
+        console.log("DEBUG2 Store.data.aiApiKey right after assign:", Store.data.aiApiKey);
         Store.save();
         // أظهر نتيجة الاستيراد
         const stats = this.getStats();
