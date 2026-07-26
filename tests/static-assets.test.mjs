@@ -477,6 +477,14 @@ describe("منع التكبير بإصبعين (بلاغ ميداني: التط�
   });
 });
 
+describe("نظافة الكود قبل الرفع للمتاجر — لا بقايا تتبّع مؤقت", () => {
+  test("لا console.log/warn/error يحتوي كلمة 'DEBUG' — بقايا جلسات تشخيص يجب ألا تصل للإنتاج", () => {
+    const html = readIndexHtml();
+    const debugLogs = [...html.matchAll(/console\.(log|warn|error)\([^)]*DEBUG/gi)];
+    assert.equal(debugLogs.length, 0, `وُجدت ${debugLogs.length} سطر تتبّع مؤقت متبقٍّ: ${debugLogs.map(m=>m[0]).join(" | ")}`);
+  });
+});
+
 describe("بنية المستودع", () => {
   ["index.html", "manifest.json", "sw.js", "README.md", "LICENSE", ".gitignore"].forEach((file) => {
     test(`الملف الجذري "${file}" موجود`, () => {

@@ -22,7 +22,7 @@ const T_AR = {
   ai_history_empty:"لا تحليلات مخزَّنة بعد — ستظهر هنا فور أول تحديث ناجح.",
 };
 
-function buildSettings(storeData, lang="ar") {
+function buildSettings(storeData, lang="ar", locked=false) {
   const document = mockDocument();
   const store = mockStore(storeData);
   let toastMsg = null;
@@ -37,6 +37,7 @@ function buildSettings(storeData, lang="ar") {
       gemini:{ model:"gemini-flash-latest" },
       anthropic:{ model:"claude-haiku-4-5-20251001" },
     }},
+    AI_FEATURE_LOCKED: locked,
     Math, Date, JSON, Object,
   };
   runInContext(validateSource, context, "validate.js");
@@ -48,6 +49,45 @@ const CACHED_STATE = {
   aiEnabled: true, aiProvider: "openai", aiApiKey: "sk-real-key",
   aiHistory: [{ ts: Date.now() - 86400000, t: "نصيحة سابقة", why: "سبب", provider: "openai", dxKey: "delay" }],
 };
+
+describe("aiSettings — قفل ميزة الذكاء الاصطناعي (AI_FEATURE_LOCKED) لإصدار المتجر الأول", () => {
+  test("applyLockState: يُعطِّل المفتاح ويُظهر شارة 'قريبًا' عندما القفل مفعَّل", () => {
+    const { aiSettings, document } = buildSettings({}, "ar", true);
+    aiSettings.applyLockState();
+    assert.equal(document.getElementById("aiToggle").disabled, true);
+    assert.equal(document.getElementById("aiLockedBadge").style.display, "inline-block");
+    assert.equal(document.getElementById("aiHintText").textContent, "ai_hint_locked");
+  });
+
+  test("applyLockState: لا يُعطِّل شيئاً عندما القفل غير مفعَّل (locked=false)", () => {
+    const { aiSettings, document } = buildSettings({}, "ar", false);
+    aiSettings.applyLockState();
+    assert.equal(document.getElementById("aiToggle").disabled, false);
+    assert.equal(document.getElementById("aiLockedBadge").style.display, "none");
+    assert.equal(document.getElementById("aiHintText").textContent, "ai_hint");
+  });
+
+  test("onToggle: القفل يرفض التفعيل حتى لو استُدعيت الدالة مباشرة (دفاع بعمق يتجاوز disabled على HTML)", () => {
+    const { aiSettings, store } = buildSettings({}, "ar", true);
+    const input = { checked: true };
+    aiSettings.onToggle(input);
+    assert.equal(input.checked, false, "يجب إعادة الحقل لغير مُفعَّل قسراً");
+    assert.equal(store.get("aiEnabled", false), false, "يجب ألا يُحفَظ أي تفعيل في Store");
+  });
+
+  test("onToggle: يعمل بشكل طبيعي كسابقاً عندما القفل غير مفعَّل", () => {
+    const { aiSettings, store } = buildSettings({}, "ar", false);
+    const input = { checked: true };
+    aiSettings.onToggle(input);
+    assert.equal(store.get("aiEnabled"), true);
+  });
+
+  test("init() يستدعي applyLockState تلقائياً — لا حاجة لاستدعاء منفصل عند فتح الإعدادات", () => {
+    const { aiSettings, document } = buildSettings({}, "ar", true);
+    aiSettings.init();
+    assert.equal(document.getElementById("aiToggle").disabled, true);
+  });
+});
 
 describe("aiSettings.onToggle — إيقاف مؤقت لا يمسح السجل التاريخي", () => {
   test("تبديل المفتاح إلى إيقاف لا يُغيّر aiHistory إطلاقاً", () => {

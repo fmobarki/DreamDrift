@@ -254,7 +254,7 @@ body::after{
   transition:border var(--normal);
 }
 .field:focus{outline:none;border-color:var(--primary)}
-.lang-opts,.remind-opts{display:flex;flex-direction:column;gap:12px;margin-top:var(--s4);border:none;padding:0}
+.lang-opts{display:flex;flex-direction:column;gap:12px;margin-top:var(--s4);border:none;padding:0}
 .opt{
   width:100%;padding:16px 20px;text-align:center;font-size:16px;font-weight:600;
   background:var(--w06);border:1.5px solid rgba(167,139,250,.2);
@@ -285,7 +285,6 @@ body::after{
 /* Header */
 .topbar{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 0 8px}
 .greet h1{font-size:22px;font-weight:700;line-height:1.2}
-.greet .greeting-time{font-size:12px;color:var(--muted);margin-top:2px}
 .greet .insight{color:var(--muted);font-size:13px;margin-top:4px;line-height:1.5}
 .greet .insight b{color:var(--calm)}
 .topbar-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
@@ -433,10 +432,6 @@ body::after{
   color:rgba(255,255,255,.88);
   text-shadow:0 1px 8px rgba(109,93,246,.3);
 }
-
-/* legacy selectors still used in render */
-.insight-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.insight-quote{font-size:15px;font-weight:500;line-height:1.8;color:rgba(255,255,255,.88)}
 
 /* ============================================================
    Relax CTA
@@ -865,10 +860,6 @@ body.app-ready .bottom-nav{transform:none;visibility:visible;overflow:visible}
 .backup-btn-sub{font-size:11px;color:var(--muted);margin-top:2px;font-weight:400}
 .backup-note{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--muted);
   background:rgba(255,200,0,.06);border:1px solid rgba(255,200,0,.15);border-radius:10px;padding:10px 12px}
-.cloud-ico{font-size:24px;flex-shrink:0}
-.cloud-title{font-size:14px;font-weight:700}
-.cloud-sub{font-size:12px;color:var(--muted);margin-top:2px}
-.cloud-txt{flex:1}
 .btn-primary.danger{border:1px solid rgba(239,68,68,.3);color:rgba(239,68,68,.8)}
 .recovery-info{background:rgba(109,93,246,.1);border:1px solid rgba(109,93,246,.25);
   border-radius:14px;padding:14px;margin-bottom:16px;text-align:start}
@@ -940,13 +931,7 @@ body.app-ready .bottom-nav{transform:none;visibility:visible;overflow:visible}
 .coming-txt{flex:1}
 .coming-name{font-size:14px;font-weight:700;color:var(--text)}
 .coming-desc{font-size:12px;color:var(--muted);margin-top:2px}
-.coming-lock{font-size:16px;flex-shrink:0;opacity:.4}
 .coming-check{font-size:18px;flex-shrink:0;color:#10B981;font-weight:800}
-.coming-soon-badge{
-  font-size:11px;font-weight:800;color:white;flex-shrink:0;
-  padding:4px 12px;border-radius:99px;
-  background:linear-gradient(135deg,var(--primary),#A855C8);
-  box-shadow:0 2px 10px rgba(109,93,246,.4)}
 .coming-ver-badge{
   font-size:10px;font-weight:700;color:var(--faint);flex-shrink:0;
   padding:3px 9px;border-radius:99px;
@@ -1134,7 +1119,6 @@ body.app-ready .bottom-nav{transform:none;visibility:visible;overflow:visible}
 
 /* Two-cards rhythm */
 .half-ico{font-size:20px}
-.half-row{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
 
 /* ============================================================
    v1.3 — Courses, Brain Training, Smart Recommendations
@@ -1183,13 +1167,6 @@ body.app-ready .bottom-nav{transform:none;visibility:visible;overflow:visible}
 
 /* Quick Breath overlay */
 .qb-modal, .viz-modal{text-align:center;padding-top:40px;padding-bottom:30px}
-.qb-orb{
-  width:120px;height:120px;margin:20px auto;border-radius:50%;
-  background:radial-gradient(circle at 35% 35%,rgba(196,181,253,.6),rgba(109,93,246,.25) 60%,rgba(109,93,246,.05));
-  border:1px solid rgba(167,139,250,.4);
-  transition:transform 3.5s ease,box-shadow 3.5s ease;
-}
-.qb-orb.in{transform:scale(1.35);box-shadow:0 0 40px rgba(109,93,246,.5)}
 .qb-phase{font-size:18px;font-weight:700;margin-top:14px}
 .qb-count{font-size:34px;font-weight:800;color:var(--calm);margin-top:6px;min-height:42px}
 
@@ -2119,16 +2096,20 @@ html[dir="ltr"] .dda-axis{margin:0 0 10px 42px}
     <pre id="notifDiagOut" style="display:none;margin-top:10px;padding:12px;background:rgba(0,0,0,.3);border-radius:10px;font-size:11px;color:#9be89b;white-space:pre-wrap;direction:ltr;text-align:left;line-height:1.7"></pre>
   </div>
 
-  <!-- الذكاء الاصطناعي (اختياري — BYOK) -->
+  <!-- الذكاء الاصطناعي (اختياري — BYOK) — مُعطَّل التفعيل مؤقتًا لإصدار المتجر الأول -->
   <div class="card">
-    <div class="settings-section-title" data-t="s_ai">تحليل بالذكاء الاصطناعي (اختياري)</div>
+    <div class="settings-section-title" style="display:flex;align-items:center;gap:8px">
+      <span data-t="s_ai">تحليل بالذكاء الاصطناعي (اختياري)</span>
+      <span id="aiLockedBadge" style="display:none;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;background:rgba(255,193,7,.15);color:#ffc107" data-t="ai_locked_badge">قريبًا</span>
+    </div>
     <div class="list-row">
       <span data-t="ai_toggle_lbl">صياغة أذكى للنصيحة الأسبوعية</span>
       <label class="switch">
-        <input type="checkbox" id="aiToggle" onchange="aiSettings.onToggle(this)"><span class="track"></span>
+        <input type="checkbox" id="aiToggle" onchange="aiSettings.onToggle(this)">
+        <span class="track"></span>
       </label>
     </div>
-    <p class="notif-hint" data-t="ai_hint">اختياري بالكامل — التحليل الأساسي يعمل دائماً محلياً بلا إنترنت. هذا فقط يُعيد صياغة النصيحة بأسلوب أكثر تنوعاً عبر نموذج تختاره أنت، بمفتاحك الخاص. يُخزَّن المفتاح على جهازك فقط ويُرسَل مباشرة لخادم المزوّد — لا خادم لنا أصلاً. أي تكلفة استخدام تقع عليك مباشرة مع المزوّد.</p>
+    <p class="notif-hint" id="aiHintText" data-t="ai_hint">اختياري بالكامل — التحليل الأساسي يعمل دائماً محلياً بلا إنترنت. هذا فقط يُعيد صياغة النصيحة بأسلوب أكثر تنوعاً عبر نموذج تختاره أنت، بمفتاحك الخاص. يُخزَّن المفتاح على جهازك فقط ويُرسَل مباشرة لخادم المزوّد — لا خادم لنا أصلاً. أي تكلفة استخدام تقع عليك مباشرة مع المزوّد.</p>
 
     <div id="aiConfigFields" style="display:none;margin-top:14px">
       <div class="list-row">
@@ -3223,6 +3204,8 @@ const STR = {
     voice_speed_label:"سرعة الصوت:", voice_speed_calm:"هادئ", voice_speed_calmer:"أهدأ", voice_speed_slowest:"بطيء جداً",
     notif_diag_btn:"تشخيص حالة الإشعارات",
     s_ai:"تحليل بالذكاء الاصطناعي (اختياري)",
+    ai_locked_badge:"قريبًا",
+    ai_hint_locked:"هذه الميزة قيد التجهيز وستُفعَّل في تحديث قادم. عند إطلاقها: صياغة أذكى للنصيحة الأسبوعية عبر نموذج ذكاء اصطناعي تختاره أنت بمفتاحك الخاص — التحليل الأساسي يعمل دائماً محلياً بلا إنترنت بصرف النظر عنها.",
     ai_toggle_lbl:"صياغة أذكى للنصيحة الأسبوعية",
     ai_hint:"اختياري بالكامل — التحليل الأساسي يعمل دائماً محلياً بلا إنترنت. هذا فقط يُعيد صياغة النصيحة بأسلوب أكثر تنوعاً عبر نموذج تختاره أنت، بمفتاحك الخاص. يُخزَّن المفتاح على جهازك فقط ويُرسَل مباشرة لخادم المزوّد — لا خادم لنا أصلاً. أي تكلفة استخدام تقع عليك مباشرة مع المزوّد.",
     ai_provider_lbl:"المزوّد", ai_save:"حفظ المفتاح", ai_test:"اختبار الاتصال", ai_clear:"حذف المفتاح",
@@ -3501,6 +3484,8 @@ const STR = {
     voice_speed_label:"Voice speed:", voice_speed_calm:"Calm", voice_speed_calmer:"Calmer", voice_speed_slowest:"Slowest",
     notif_diag_btn:"Diagnose notification status",
     s_ai:"AI-Powered Analysis (Optional)",
+    ai_locked_badge:"Coming soon",
+    ai_hint_locked:"This feature is being prepared and will be enabled in an upcoming update. Once live: smarter phrasing for your weekly tip via an AI model you choose, with your own key — the core analysis always works locally, offline, regardless.",
     ai_toggle_lbl:"Smarter phrasing for weekly tip",
     ai_hint:"Fully optional — core analysis always works locally, offline. This only rephrases the tip more naturally via a model you choose, using your own key. The key is stored on your device only and sent directly to the provider — we have no server at all. Any usage cost is billed to you directly by the provider.",
     ai_provider_lbl:"Provider", ai_save:"Save key", ai_test:"Test connection", ai_clear:"Remove key",
@@ -3544,6 +3529,11 @@ const STR = {
 };
 // رقم الإصدار الموحّد — المصدر الوحيد للحقيقة لكل مراجع الإصدار في الكود
 const APP_VERSION = "1.5.0";
+// قفل مؤقت لتفعيل ميزة الذكاء الاصطناعي (BYOK) تحديدًا لإصدار متجر جوجل بلاي
+// الأول — الميزة تبقى ظاهرة ومشروحة للمستخدم، لكن مفتاح التفعيل مُعطَّل فعليًا
+// (disabled على مستوى HTML، لا مجرد إخفاء بصري). لإعادة تفعيلها مستقبلًا:
+// غيِّر هذا المتغيّر إلى false فقط، لا حاجة لأي تعديل آخر في الكود.
+const AI_FEATURE_LOCKED = true;
 
 /* ============================================================
    ملاحظات تقنية للإصدارات القادمة — لا تُنفَّذ الآن عمداً
@@ -4150,7 +4140,7 @@ const picker = {
 };
 
 const ob = {
-  step:0, name:"", lang:"ar", 
+  step:0, name:"", selectedLang:"ar", 
   show(i){
     this.step=i;
     document.querySelectorAll(".ob-step").forEach(s=>s.classList.toggle("active", +s.dataset.step===i));
@@ -4172,7 +4162,11 @@ const ob = {
     this.show(this.step+1);
   },
   lang(l,btn){
-    this.lang=l; LANG=l; applyLang();
+    // خلل حرج مُصلَح: كانت هذه الدالة تُسمَّى "lang" وتكتب this.lang=l في
+    // أول سطر لها — نفس اسم الدالة نفسها! هذا يستبدل الدالة بنص القيمة
+    // المختارة عند أول ضغطة، فتفشل كل ضغطة تالية بـ"ob.lang is not a
+    // function" (رُصد ميدانياً: يقبل التطبيق الضغطة الأولى فقط لا غير).
+    this.selectedLang=l; LANG=l; applyLang();
     document.querySelectorAll(".lang-opts .opt").forEach(o=>o.classList.remove("sel"));
     btn.classList.add("sel");
   },
@@ -4473,6 +4467,19 @@ const aiSettings = {
     this.refreshModelPlaceholder();
     const result = document.getElementById("aiTestResult"); if(result) result.style.display="none";
     this.refreshUsage();
+    this.applyLockState();
+  },
+  // يُطبِّق قفل تفعيل الميزة (AI_FEATURE_LOCKED) — تعطيل حقيقي على مستوى
+  // HTML (disabled) لا مجرد منع بصري، مع شارة "قريبًا" وتلميح مختلف يشرح
+  // الوضع. مرتبط بمتغيّر تحكّم واحد أعلى الملف، فإعادة الفتح مستقبلًا لا
+  // تحتاج غير تغييره إلى false.
+  applyLockState(){
+    const toggle = document.getElementById("aiToggle");
+    const badge = document.getElementById("aiLockedBadge");
+    const hint = document.getElementById("aiHintText");
+    if(toggle) toggle.disabled = AI_FEATURE_LOCKED;
+    if(badge) badge.style.display = AI_FEATURE_LOCKED ? "inline-block" : "none";
+    if(hint) hint.textContent = AI_FEATURE_LOCKED ? t("ai_hint_locked") : t("ai_hint");
   },
   refreshUsage(){
     const el = document.getElementById("aiUsageCounter");
@@ -4532,6 +4539,9 @@ const aiSettings = {
     document.getElementById("aiHistoryModal")?.classList.remove("show");
   },
   onToggle(input){
+    // طبقة حماية ثانية — التعطيل الأساسي عبر disabled على عنصر HTML، وهذا
+    // يمنع التفعيل حتى لو استُدعيت الدالة مباشرة بأي طريقة تتجاوز ذلك
+    if(AI_FEATURE_LOCKED){ input.checked = false; return; }
     Store.set("aiEnabled", input.checked);
     const fields = document.getElementById("aiConfigFields");
     if(fields) fields.style.display = input.checked ? "block" : "none";
@@ -6201,9 +6211,6 @@ function toast(msg){
   toastTimer=setTimeout(()=>el.classList.remove("show"),2400);
 }
 
-/* Re-apply language live during onboarding language step */
-const _origLang = ob.lang.bind(ob);
-
 // إعادة طلب Wake Lock تلقائياً عند العودة للتطبيق أثناء تمرين جارٍ
 document.addEventListener("visibilitychange", ()=>{
   if(document.visibilityState==="visible"
@@ -6721,9 +6728,7 @@ const dataManager = {
           }
         }
 
-        console.log("DEBUG2 merged.aiApiKey before save:", merged.aiApiKey);
         Store.data = merged;
-        console.log("DEBUG2 Store.data.aiApiKey right after assign:", Store.data.aiApiKey);
         Store.save();
         // أظهر نتيجة الاستيراد
         const stats = this.getStats();
