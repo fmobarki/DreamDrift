@@ -467,6 +467,16 @@ describe("أصول متجر جوجل بلاي (TWA) — manifest، assetlinks، 
   });
 });
 
+describe("منع التكبير بإصبعين (بلاغ ميداني: التطبيق شعر كصفحة ويب داخل TWA على جهاز حقيقي)", () => {
+  test("وسم viewport يحتوي maximum-scale=1.0 وuser-scalable=no", () => {
+    const html = readIndexHtml();
+    const match = html.match(/<meta name="viewport" content="([^"]+)">/);
+    assert.ok(match, "وسم viewport غير موجود");
+    assert.match(match[1], /maximum-scale=1(\.0)?/);
+    assert.match(match[1], /user-scalable=no/);
+  });
+});
+
 describe("بنية المستودع", () => {
   ["index.html", "manifest.json", "sw.js", "README.md", "LICENSE", ".gitignore"].forEach((file) => {
     test(`الملف الجذري "${file}" موجود`, () => {
