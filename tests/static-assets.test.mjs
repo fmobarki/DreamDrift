@@ -196,10 +196,10 @@ describe("Validate مُطبَّقة فعلياً على نقاط الحفظ ال
 });
 
 describe("إمكانية الوصول (النقطة 14) — role/tabindex، لوحة المفاتيح، الحجم، fieldset، focus-visible", () => {
-  test("17 عنصر div ثابت في HTML التفاعلي تحمل role=button وtabindex=0", () => {
+  test("18 عنصر div ثابت في HTML التفاعلي تحمل role=button وtabindex=0", () => {
     const html = readIndexHtml();
     const matches = [...html.matchAll(/<div class="[^"]*" onclick="[^"]*"[^>]*>/g)];
-    assert.equal(matches.length, 17);
+    assert.equal(matches.length, 18);
     matches.forEach((m) => {
       assert.match(m[0], /role="button"/, `عنصر بلا role: ${m[0].slice(0, 60)}`);
       assert.match(m[0], /tabindex="0"/, `عنصر بلا tabindex: ${m[0].slice(0, 60)}`);
@@ -443,6 +443,14 @@ describe("أصول متجر جوجل بلاي (TWA) — manifest، assetlinks، 
     assert.ok(data[0].target.sha256_cert_fingerprints);
   });
 
+  test("assetlinks.json يحتوي مكانًا محجوزًا لبصمة Play App Signing (بجانب البصمة المحلية) — بلا هذا يتعطّل شريط العنوان لمستخدمي المتجر", () => {
+    const p = path.join(ROOT, ".well-known/assetlinks.json");
+    const data = JSON.parse(fs.readFileSync(p, "utf8"));
+    const fingerprints = data[0].target.sha256_cert_fingerprints;
+    assert.equal(fingerprints.length, 2, "يجب وجود بصمتين: المحلية للاختبار + مكان محجوز لبصمة المتجر");
+    assert.match(fingerprints[1], /PLAY_APP_SIGNING/);
+  });
+
   test("icon-512-store.png معتمة تمامًا (color type=2 أي RGB بلا قناة شفافية) بأبعاد 512×512 — مطلوبة لقائمة المتجر", () => {
     const p = path.join(ROOT, "icons/icon-512-store.png");
     assert.ok(fs.existsSync(p), "أيقونة المتجر المعتمة غير موجودة");
@@ -482,6 +490,48 @@ describe("نظافة الكود قبل الرفع للمتاجر — لا بقا
     const html = readIndexHtml();
     const debugLogs = [...html.matchAll(/console\.(log|warn|error)\([^)]*DEBUG/gi)];
     assert.equal(debugLogs.length, 0, `وُجدت ${debugLogs.length} سطر تتبّع مؤقت متبقٍّ: ${debugLogs.map(m=>m[0]).join(" | ")}`);
+  });
+});
+
+describe("توضيح قاعدة العشرين دقيقة في درس إدارة القلق (طلب مستخدم مباشر)", () => {
+  test("النص العربي يوضّح بداية العدّ، أمثلة نشاط ملموسة، والسبب العلمي — لا وصفًا مجردًا فقط", () => {
+    const html = readIndexHtml();
+    assert.match(html, /c6_body:"[^"]*من لحظة إغلاق عينيك/, "يجب توضيح متى يبدأ العدّ تحديدًا");
+    assert.match(html, /c6_body:"[^"]*لا شاشات إطلاقاً/, "يجب مثال ملموس لما يُمنَع");
+    assert.match(html, /c6_body:"[^"]*ربط السرير بالقلق/, "يجب شرح السبب العلمي (Stimulus Control)");
+  });
+
+  test("النص الإنجليزي يحتوي نفس التوضيحات الثلاثة", () => {
+    const html = readIndexHtml();
+    assert.match(html, /c6_body:"[^"]*close your eyes trying to actually sleep/);
+    assert.match(html, /c6_body:"[^"]*no screens at all/);
+    assert.match(html, /c6_body:"[^"]*link the bed with anxiety/);
+  });
+});
+
+describe("ESLint — أداة تطوير اختيارية جديدة (لا تؤثر على التطبيق المُسلَّم)", () => {
+  test("eslint.config.js وscripts/extract-for-lint.mjs موجودان", () => {
+    assert.ok(fs.existsSync(path.join(ROOT, "eslint.config.js")));
+    assert.ok(fs.existsSync(path.join(ROOT, "scripts/extract-for-lint.mjs")));
+  });
+
+  test("package.json يحتوي أمر lint وeslint كاعتمادية تطوير فقط (لا اعتمادية تشغيل)", () => {
+    const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
+    assert.ok(pkg.scripts.lint);
+    assert.ok(pkg.devDependencies.eslint);
+    assert.equal(pkg.dependencies, undefined, "يجب ألا توجد أي اعتمادية تشغيل — التطبيق يبقى بلا خطوة بناء");
+  });
+
+  test("سكربت الاستخراج ينتج ملفًا صالحًا فعليًا من index.html الحالي", () => {
+    const html = readIndexHtml();
+    const match = html.match(/<script(?![^>]*src=)[^>]*>([\s\S]*?)<\/script>/);
+    assert.ok(match, "يجب وجود كتلة script واحدة على الأقل قابلة للاستخراج");
+    assert.ok(match[1].length > 1000);
+  });
+
+  test(".lint-extracted.js مُستبعَد من git (ملف مؤقت لا يُرفَع)", () => {
+    const gitignore = fs.readFileSync(path.join(ROOT, ".gitignore"), "utf8");
+    assert.match(gitignore, /\.lint-extracted\.js/);
   });
 });
 

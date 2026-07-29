@@ -32,8 +32,14 @@ jobs:
         with:
           node-version: "22"
 
-      - name: تشغيل حزمة الاختبارات (247 اختباراً)
+      - name: تثبيت اعتماديات التطوير (ESLint فقط — لا اعتماديات تشغيل)
+        run: npm install --no-save
+
+      - name: تشغيل حزمة الاختبارات (273 اختباراً)
         run: npm test
+
+      - name: فحص ESLint (يحجب على أخطاء حقيقية فقط، لا التحذيرات الموثَّقة في eslint.config.js)
+        run: npm run lint
 
       - name: فحص أن لا ملفات PWA مفقودة (manifest.json و sw.js و.nojekyll)
         run: |

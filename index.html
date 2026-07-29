@@ -1192,11 +1192,15 @@ body.app-ready .bottom-nav{transform:none;visibility:visible;overflow:visible}
 .cycle-chip{
   flex:1;min-width:0;text-align:center;padding:8px 2px;border-radius:12px;cursor:default;
   background:var(--w04);border:1px solid var(--w09);
-  transition:all var(--normal);
+  transition:all var(--normal);position:relative;
 }
 .cycle-chip .cc-time{display:block;font-size:11.5px;font-weight:800;color:var(--text);white-space:nowrap}
 .cycle-chip .cc-n{display:block;font-size:9px;color:var(--faint);margin-top:3px;white-space:nowrap}
 .cycle-chip .cc-h{display:block;font-size:8.5px;color:var(--faint);margin-top:1px;opacity:.75;white-space:nowrap}
+/* إشارة خفيفة جداً — لا بانر، فقط رمز صغير في الزاوية مع تلميح عند التمرير/اللمس */
+.cc-melatonin-flag{
+  position:absolute;top:2px;inset-inline-end:3px;font-size:7px;opacity:.55;line-height:1;cursor:help;
+}
 .cycles-note{font-size:10.5px;line-height:1.6;color:var(--faint);margin-top:10px;opacity:.85}
 .cycle-chip.rec{
   background:rgba(232,67,147,.16);border-color:rgba(232,67,147,.55);
@@ -1809,6 +1813,11 @@ html[dir="ltr"] .dda-axis{margin:0 0 10px 42px}
     <div class="viz-item" onclick="visualize.open('viz3')" role="button" tabindex="0">
       <div class="viz-ico">🧘</div>
       <div class="viz-txt"><b data-t="viz3_title">مسح الجسم</b><p data-t="viz3_dur">~60 ثانية للمقطع</p></div>
+      <button class="go">←</button>
+    </div>
+    <div class="viz-item" onclick="visualize.open('viz4')" role="button" tabindex="0">
+      <div class="viz-ico">🚣</div>
+      <div class="viz-txt"><b data-t="viz4_title">قارب النهر الهادئ (قصة)</b><p data-t="viz4_dur">~55 ثانية للمقطع</p></div>
       <button class="go">←</button>
     </div>
   </div>
@@ -2973,7 +2982,6 @@ const STR = {
     ob2_title:"كيف تحب أن نناديك؟", ob2_desc:"اسمك، كنيتك، أو أي اسم تحب أن نناديك به.", ob2_ph:"اسمك أو كنيتك",
     ob3_title:"اختر لغتك", ob4_title:"متى تستيقظ عادةً؟", ob4_desc:"سنحسب لك أفضل موعد للنوم ولبدء التهدئة.",
     hi:"مرحباً", good_morning:"صباح الخير", good_afternoon:"مساء النور", good_evening:"مساء الخير", pulse_title:"Daily Pulse", pulse_sub:"كيف تشعر اليوم؟",
-    m5:"ممتاز",m4:"جيد",m3:"عادي",m2:"متوتر",m1:"مرهق",
     rhythm_title:"إيقاع النوم", tonight_title:"خطة الليلة", r_wake:"استيقاظ", r_sleep:"نوم", r_wind:"تهدئة", r_edit:"تعديل الغد",
     edit_title:"وقت استيقاظ الغد", edit_desc:"عدّل وقت غدٍ فقط — يعود إلى المعتاد تلقائياً بعده.",
     edit_save:"حفظ لغدٍ", edit_reset:"استخدام وقتي المعتاد", edit_cancel:"إلغاء",
@@ -3046,7 +3054,7 @@ const STR = {
     wr_saved:"تم حفظ التقرير ✓",
     notif_hint:"إشعارات محلية تعمل على جهازك فقط — لا بيانات تُرسَل لأي خادم",
     notif_unsupported:"الإشعارات غير مدعومة على هذا الجهاز",
-    notif_denied:"تم رفض الإذن — يمكنك تفعيله من إعدادات المتصفح",
+    notif_denied:"تم رفض الإذن — فعِّله من: إعدادات الجهاز ← التطبيقات ← DreamDrift ← الإشعارات",
     notif_enabled:"تم تفعيل الإشعارات ✓", notif_disabled:"تم إيقاف الإشعارات",
     s_data_sub:"احتفظ بنسخة احتياطية من جميع بياناتك",
     export_title:"تصدير البيانات", export_sub:"حفظ نسخة JSON على جهازك",
@@ -3180,7 +3188,7 @@ const STR = {
     c5_title:"بناء روتين ليلي هادئ",
     c5_body:"الروتين الثابت يُرسل إشارة لدماغك أن النوم قادم. اختر 3-4 عادات بسيطة تُكررها كل ليلة بنفس الترتيب: خفض الإضاءة، تمرين تنفس، كتابة 3 أشياء ممتنّ لها، ثم القراءة. لا يحتاج الروتين أن يتجاوز 20 دقيقة — الأهم هو التكرار والثبات، فهو ما يُبرمج عقلك على الاسترخاء تلقائياً.",
     c6_title:"إدارة القلق والتفكير الزائد ليلاً",
-    c6_body:"إن كانت الأفكار تُبقيك مستيقظاً، جرّب 'تفريغ الذهن': اكتب كل ما يشغل بالك في ورقة قبل النوم بعشر دقائق — هذا يمنح دماغك إذناً بالتوقف عن التذكير. إن لم ينفع، جرّب قاعدة العشرين دقيقة: إن لم تنم خلالها، انهض لنشاط هادئ في إضاءة خافتة حتى يعود النعاس، بدل البقاء في السرير قلقاً.",
+    c6_body:"إن كانت الأفكار تُبقيك مستيقظاً، جرّب 'تفريغ الذهن': اكتب كل ما يشغل بالك في ورقة قبل النوم بعشر دقائق — هذا يمنح دماغك إذناً بالتوقف عن التذكير. إن لم ينفع، جرّب قاعدة العشرين دقيقة: ابدأ العدّ من لحظة إغلاق عينيك لتنام فعلياً (لا من دخولك السرير) — إن مرّت عشرون دقيقة ولا تزال مستيقظاً، انهض لنشاط هادئ حقيقي بإضاءة خافتة جداً (قراءة ورقية، تمدّد خفيف، تنفّس بطيء — لا شاشات إطلاقاً)، وعُد للسرير فقط عندما تشعر بنعاس حقيقي، وكرّر إن لزم. السبب: البقاء مستيقظاً في السرير قلقاً يُعلِّم دماغك ربط السرير بالقلق لا بالنوم — والنهوض يكسر هذا الربط تدريجياً.",
     c7_title:"النوم لمن يعملون بجدول متغيّر",
     c7_body:"إن كان جدولك يتغيّر بين أيام العمل والعطلة، حافظ على وقت استيقاظ ثابت قدر الإمكان — حتى لو تغيّر وقت نومك. استخدم ميزة 'الإيقاع المتغيّر' في DreamDrift لضبط توقيت مختلف لأيام العمل والعطلة تلقائياً. تجنّب فارقاً أكثر من ساعة بين أيام الأسبوع والعطلة لتفادي ما يُعرف بارتباك الساعة البيولوجية.",
     c8_title:"النوم في أوقات الامتحانات والضغط",
@@ -3231,6 +3239,12 @@ const STR = {
     viz2_3:"كل نفس يأخذك أعمق في هذا الهدوء الأخضر...", viz2_4:"جسمك يثقل، وعقلك يهدأ كسكون الغابة...",
     viz3_1:"ابدأ من أصابع قدميك — أرخِها تماماً...", viz3_2:"دع الاسترخاء يصعد لساقيك وبطنك...",
     viz3_3:"أرخِ كتفيك ويديك، دعهما يثقلان...", viz3_4:"أخيراً أرخِ وجهك وجبينك — استرخِ كاملاً الآن...",
+    viz4_title:"قارب النهر الهادئ (قصة)", viz4_dur:"~55 ثانية للمقطع",
+    viz4_1:"تخيّل قاربًا خشبيًا صغيرًا ينزلق بهدوء فوق نهر ساكن عند الغسق. الماء أملس كالحرير، والمجاديف مستريحة، لا صوت سوى خرير خفيف تحت القارب.",
+    viz4_2:"على الضفتين، أضواء قرية صغيرة تنطفئ نافذة بعد نافذة، كأن القرية نفسها تُغمض عينيها ببطء واحدة تلو الأخرى، مستسلمة للنعاس.",
+    viz4_3:"بومة على غصن قريب ترمش ببطء شديد، وثعلب يتكوّر بهدوء بين الأعشاب، ويراعات صغيرة تخفت أضواؤها كفوانيس تنام واحدًا تلو الآخر.",
+    viz4_4:"يتباطأ التيار أكثر فأكثر، وكأن النهر نفسه يتثاءب، بينما تبدأ النجوم بالظهور فوقك، واحدة واحدة، كعيون نعسانة تُغلَق بلطف في السماء المظلمة.",
+    viz4_5:"يصل القارب أخيرًا لضفة هادئة، يتوقف برفق دون أي جهد، والعالم كله من حولك يزفر زفرة طويلة مطمئنة... وأنت أيضًا، تزفر معه، وتغرق في نوم عميق وهادئ.",
 
     // ===== توصيات ذكية =====
     rec_title:"توصية الليلة", rec_more_data:"سجّل نومك لأيام أكثر لتحصل على توصية مخصصة لك 🌙",
@@ -3242,6 +3256,7 @@ const STR = {
     feat_courses:"مكتبة الدورات التعليمية", feat_courses_d:"9 دورات قصيرة عن علم النوم والعادات",
     feat_brain:"برمجة الدماغ وتوصيات ذكية", feat_brain_d:"تمارين تنفّس، استرخاء موجّه بالصوت، وتوصيات مبنية على بياناتك",
     cycles_unit:"دورات", cycles_rec_badge:"الموصى بها", cycles_hours_short:"س",
+    melatonin_window_hint:"هذا التوقيت خارج نافذة إفراز الميلاتونين الطبيعية عند أغلب البالغين (٩م-٧:٣٠ص تقريباً) — قد تتأثر جودة نومك. تقريب عام لا قاعدة مطلقة.",
     cycles_note:"الوقت هو موعد الذهاب للسرير — نضيف له 15 دقيقة تقريباً للدخول الفعلي في النوم، ومنها تبدأ الدورات حتى الاستيقاظ",
 
     langName:"العربية"
@@ -3253,7 +3268,6 @@ const STR = {
     ob2_title:"What should we call you?", ob2_desc:"Your name, nickname, or anything you'd like us to call you.", ob2_ph:"Your name or nickname",
     ob3_title:"Choose your language", ob4_title:"When do you usually wake up?", ob4_desc:"We'll find your best sleep and wind-down times.",
     hi:"Hello", good_morning:"Good morning", good_afternoon:"Good afternoon", good_evening:"Good evening", pulse_title:"Daily Pulse", pulse_sub:"How do you feel today?",
-    m5:"Great",m4:"Good",m3:"Okay",m2:"Tense",m1:"Drained",
     rhythm_title:"Sleep rhythm", tonight_title:"Tonight's plan", r_wake:"Wake", r_sleep:"Sleep", r_wind:"Wind-down", r_edit:"Edit tomorrow",
     edit_title:"Tomorrow's wake time", edit_desc:"Adjust tomorrow only — it returns to your usual time after.",
     edit_save:"Save for tomorrow", edit_reset:"Use my usual time", edit_cancel:"Cancel",
@@ -3326,7 +3340,7 @@ const STR = {
     wr_saved:"Report saved ✓",
     notif_hint:"Local notifications on your device only — no data is sent to any server",
     notif_unsupported:"Notifications aren't supported on this device",
-    notif_denied:"Permission denied — you can enable it from browser settings",
+    notif_denied:"Permission denied — enable it via: Device Settings → Apps → DreamDrift → Notifications",
     notif_enabled:"Notifications enabled ✓", notif_disabled:"Notifications disabled",
     s_data_sub:"Keep a backup of all your data",
     export_title:"Export data", export_sub:"Save a JSON file to your device",
@@ -3460,7 +3474,7 @@ const STR = {
     c5_title:"Building a Calm Night Routine",
     c5_body:"A consistent routine signals to your brain that sleep is coming. Pick 3-4 simple habits to repeat every night in the same order: dim the lights, a breathing exercise, write 3 things you're grateful for, then read. The routine doesn't need to exceed 20 minutes — what matters most is repetition and consistency, which is what programs your mind to relax automatically.",
     c6_title:"Managing Anxiety & Overthinking at Night",
-    c6_body:"If thoughts are keeping you up, try a 'brain dump': write down everything on your mind on paper 10 minutes before bed — this gives your brain permission to stop reminding you. If that doesn't help, try the 20-minute rule: if you haven't fallen asleep within 20 minutes, get up for a calm, dimly-lit activity until drowsiness returns, instead of lying in bed anxious.",
+    c6_body:"If thoughts are keeping you up, try a 'brain dump': write down everything on your mind on paper 10 minutes before bed — this gives your brain permission to stop reminding you. If that doesn't help, try the 20-minute rule: start counting from the moment you close your eyes trying to actually sleep (not from getting into bed) — if 20 minutes pass and you're still awake, get up for a genuinely calm, very dimly-lit activity (paper reading, light stretching, slow breathing — no screens at all), and return to bed only once you feel real drowsiness, repeating if needed. Why: staying awake in bed anxious teaches your brain to link the bed with anxiety instead of sleep — getting up gradually breaks that link.",
     c7_title:"Sleep for Variable Work Schedules",
     c7_body:"If your schedule shifts between workdays and days off, keep your wake time as consistent as possible — even if your bedtime shifts. Use DreamDrift's 'Variable Rhythm' feature to automatically set different timing for work days and days off. Avoid more than an hour's difference between weekdays and weekends to prevent what's known as circadian disruption.",
     c8_title:"Sleeping Well During Exams & Stress",
@@ -3511,6 +3525,12 @@ const STR = {
     viz2_3:"Every breath takes you deeper into this green stillness...", viz2_4:"Your body grows heavy, your mind as still as the forest...",
     viz3_1:"Start at your toes — let them fully relax...", viz3_2:"Let the relaxation rise through your legs and stomach...",
     viz3_3:"Relax your shoulders and hands, let them grow heavy...", viz3_4:"Finally, relax your face and forehead — fully at ease now...",
+    viz4_title:"The Calm River Boat (story)", viz4_dur:"~55 sec per segment",
+    viz4_1:"Picture a small wooden boat gliding quietly over a still river at dusk. The water is smooth as silk, the oars resting, no sound but a soft murmur beneath the boat.",
+    viz4_2:"Along both banks, a small village's lights fade out window by window, as if the village itself is slowly closing its eyes, one by one, surrendering to sleep.",
+    viz4_3:"An owl on a nearby branch blinks very slowly, a fox curls up quietly among the grass, and tiny fireflies dim like little lanterns going to sleep one after another.",
+    viz4_4:"The current slows more and more, as if the river itself is yawning, while stars begin to appear above you, one by one, like sleepy eyes gently closing in the dark sky.",
+    viz4_5:"The boat finally reaches a quiet shore, stopping gently without any effort, and the whole world around you lets out one long, reassuring breath... and you breathe out with it too, sinking into deep, peaceful sleep.",
 
     // ===== Smart Recommendations =====
     rec_title:"Tonight's Recommendation", rec_more_data:"Log your sleep for a few more days to get a recommendation tailored to you 🌙",
@@ -3522,6 +3542,7 @@ const STR = {
     feat_courses:"Courses Library", feat_courses_d:"9 short courses on sleep science and habits",
     feat_brain:"Brain Training & Smart Recommendations", feat_brain_d:"Breathing exercises, guided relaxation, and recommendations based on your own data",
     cycles_unit:"cycles", cycles_rec_badge:"Recommended", cycles_hours_short:"h",
+    melatonin_window_hint:"This time falls outside the natural melatonin window for most adults (roughly 9pm-7:30am) — sleep quality may be affected. A general approximation, not a strict rule.",
     cycles_note:"This is your bedtime — we add ~15 minutes to actually fall asleep, and cycles are counted from that point until you wake up",
 
     langName:"English"
@@ -3957,6 +3978,16 @@ const SleepAnalysis = {
    Rhythm Engine — حساب النوم والتهدئة
    6 دورات × 90 دقيقة + 15 دقيقة للدخول في النوم
    ============================================================ */
+// نافذة إفراز الميلاتونين التقريبية عند أغلب البالغين (٩ مساءً - ٧:٣٠ صباحًا) —
+// تقريب عام لا قاعدة مطلقة (يختلف فرديًا: يتأخر عند المراهقين، يبكّر عند كبار
+// السن). نستخدمها لملاحظة لطيفة فقط لا لفرض قيد على الحساب نفسه — المستخدم
+// قد يعمل نوبات ليلية فعلية ولسنا حكماء على جدوله.
+function isWithinMelatoninWindow(minutesSinceMidnight){
+  const windowStart = 21*60;      // 21:00
+  const windowEnd   = 7*60+30;    // 07:30 اليوم التالي
+  return minutesSinceMidnight >= windowStart || minutesSinceMidnight <= windowEnd;
+}
+
 function calcRhythm(wake){
   const [h,m] = wake.split(":").map(Number);
   const wakeMin = h*60+m;
@@ -3969,9 +4000,9 @@ function calcRhythm(wake){
   const RECOMMENDED_CYCLES = 5;
   const cycles = CYCLE_OPTIONS.map(n=>{
     const cSleepMin = (wakeMin - (n*90+15) + 1440) % 1440;
-    return { n, time: fmt(cSleepMin), hours: +(n*1.5).toFixed(1), recommended: n===RECOMMENDED_CYCLES };
+    return { n, time: fmt(cSleepMin), hours: +(n*1.5).toFixed(1), recommended: n===RECOMMENDED_CYCLES, outsideMelatoninWindow: !isWithinMelatoninWindow(cSleepMin) };
   });
-  return { sleep:fmt(sleepMin), wind:fmt(windMin), sleepMin, windMin, cycles };
+  return { sleep:fmt(sleepMin), wind:fmt(windMin), sleepMin, windMin, cycles, outsideMelatoninWindow: !isWithinMelatoninWindow(sleepMin) };
 }
 
 /* ============================================================
@@ -5269,9 +5300,10 @@ const visualize = {
   scripts:{
     viz1:["viz1_1","viz1_2","viz1_3","viz1_4"],
     viz2:["viz2_1","viz2_2","viz2_3","viz2_4"],
-    viz3:["viz3_1","viz3_2","viz3_3","viz3_4"]
+    viz3:["viz3_1","viz3_2","viz3_3","viz3_4"],
+    viz4:["viz4_1","viz4_2","viz4_3","viz4_4","viz4_5"]
   },
-  perLine:{viz1:45, viz2:45, viz3:60},
+  perLine:{viz1:45, viz2:45, viz3:60, viz4:55},
   open(id){
     this.current=id; this.idx=0;
     const overlay=document.getElementById("vizOverlay");
@@ -5697,8 +5729,13 @@ const app = {
     if(!r.cycles) return;
     el.innerHTML = r.cycles.map(c=>{
       const hoursTxt = (c.hours % 1 === 0) ? c.hours : c.hours.toFixed(1);
+      // إشارة خفيفة لا بانر مزعج — نجمة صغيرة + tooltip فقط عند تجاوز نافذة
+      // الميلاتونين الطبيعية (تقريب عام، لا قاعدة مطلقة تفرض شيئاً على الحساب)
+      const melatoninMark = c.outsideMelatoninWindow
+        ? `<span class="cc-melatonin-flag" title="${t('melatonin_window_hint')}">🌙?</span>` : "";
       return `
       <div class="cycle-chip ${c.recommended?"rec":""}" title="${c.recommended?t("cycles_rec_badge"):""}">
+        ${melatoninMark}
         <span class="cc-time">${c.time}</span>
         <span class="cc-n">${c.n} ${t("cycles_unit")}</span>
         <span class="cc-h">${hoursTxt}${t("cycles_hours_short")}</span>
@@ -6731,7 +6768,6 @@ const dataManager = {
         Store.data = merged;
         Store.save();
         // أظهر نتيجة الاستيراد
-        const stats = this.getStats();
         const msg   = document.getElementById("importSuccessMsg");
         if(msg) msg.textContent = `${t("import_found")} ${parsed.meta.date?.slice(0,10)||"—"}`;
         const modal = document.getElementById("importSuccessModal");
@@ -6796,6 +6832,14 @@ async function registerPWA(){
    لأن هذا مخالفة تُرفض في مراجعة App Store وGoogle Play، ويُنفّر أغلب
    المستخدمين. الدالة requestNotificationPermission أدناه هي نقطة الدخول
    الصحيحة الوحيدة، وتُستدعى من زر صريح في شاشة الإعدادات. */
+/* ملاحظة مهمة لسياق TWA (تغليف أندرويد عبر Bubblewrap): منذ أندرويد ١٣،
+   لا تحصل التطبيقات على إذن الإشعارات تلقائيًا — يتطلّب الأمر إذن نظام
+   منفصلاً (POST_NOTIFICATIONS) على مستوى أندرويد نفسه، مختلفاً عن إذن الويب
+   هنا. لو ظهر Notification.permission==='denied' فورًا بلا أي طلب سابق من
+   المستخدم داخل هذا الكود، فهذا يعني أن إذن النظام لم يُمنَح بعد — الحل
+   الوحيد وقتها هو تفعيله يدويًا من: إعدادات الجهاز ← التطبيقات ← DreamDrift
+   ← الإشعارات (لا شيء في هذا الكود يمكنه تجاوز هذا القيد). هذا موثَّق رسميًا
+   في مستودع Bubblewrap (issue #730) وليس خللاً في هذا التطبيق. */
 async function requestNotificationPermission(){
   if(!('Notification' in window)){ toast(t('notif_unsupported')); return false; }
   if(Notification.permission === 'granted') return true;

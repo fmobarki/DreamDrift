@@ -5,7 +5,8 @@
       "namespace": "android_app",
       "package_name": "app.dreamdrift.twa",
       "sha256_cert_fingerprints": [
-        "D5:AC:63:7E:C5:FA:58:73:E3:2F:84:4F:E6:23:6D:F8:62:30:B7:04:3A:32:3B:47:58:05:96:B4:39:00:0D:2E"
+        "D5:AC:63:7E:C5:FA:58:73:E3:2F:84:4F:E6:23:6D:F8:62:30:B7:04:3A:32:3B:47:58:05:96:B4:39:00:0D:2E",
+        "REPLACE_WITH_PLAY_APP_SIGNING_SHA256_AFTER_FIRST_UPLOAD_TO_CONSOLE"
       ]
     }
   }

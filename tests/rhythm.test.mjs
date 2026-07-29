@@ -8,7 +8,7 @@ import assert from "node:assert/strict";
 import { readIndexHtml, extractBetween, runInContext, mockStore } from "./helpers/extract.mjs";
 
 const html = readIndexHtml();
-const moduleSource = extractBetween(html, "function calcRhythm", "\nconst app = {")
+const moduleSource = extractBetween(html, "function isWithinMelatoninWindow", "\nconst app = {")
   .replace("const rhythm = {", "var rhythm = {");
 
 function buildRhythm(storeData, fixedDate) {
@@ -104,3 +104,36 @@ describe("اختبار انحدار: كل مستهلكي وقت الاستيقا
     assert.notEqual(rec.time, wrongR.cycles.find((c) => c.n === 5).time);
   });
 });
+
+describe("calcRhythm — ملاحظة نافذة الميلاتونين (طلب مستخدم مباشر)", () => {
+  test("وقت نوم داخل النافذة الطبيعية (22:00) → outsideMelatoninWindow=false", () => {
+    const { calcRhythm } = buildRhythm({});
+    // استيقاظ 07:30 مع 5 دورات (450د) + 15د دخول نوم = 465د = 7س45د قبل → 23:45 تقريباً
+    const r = calcRhythm("07:30");
+    assert.equal(r.outsideMelatoninWindow, false, `sleep=${r.sleep} يجب أن يكون داخل النافذة`);
+  });
+
+  test("وقت نوم بعيد جداً (نهاري، خارج النافذة) → outsideMelatoninWindow=true", () => {
+    const { calcRhythm } = buildRhythm({});
+    // استيقاظ في المساء (مثلاً بعد قيلولة) يُنتج وقت نوم نهاري خارج النافذة
+    const r = calcRhythm("22:00"); // وقت النوم المحسوب سيقع في فترة نهارية
+    assert.equal(r.outsideMelatoninWindow, true, `sleep=${r.sleep} يجب أن يكون خارج النافذة`);
+  });
+
+  test("كل خيار دورة (3-7) يحمل outsideMelatoninWindow الخاص به لا قيمة واحدة مشتركة", () => {
+    const { calcRhythm } = buildRhythm({});
+    const r = calcRhythm("07:00");
+    r.cycles.forEach((c) => {
+      assert.equal(typeof c.outsideMelatoninWindow, "boolean", `الدورة ${c.n} يجب أن تحمل الحقل`);
+    });
+  });
+
+  test("حدود النافذة بالضبط (21:00 و07:30) تُحسَبان ضمن النافذة لا خارجها", () => {
+    const { calcRhythm } = buildRhythm({});
+    // استيقاظ يُنتج وقت نوم = 21:00 بالضبط: من 90*5+15=465د قبل 04:45 مثلاً
+    const atStart = calcRhythm("04:45"); // 04:45 - 7:45 = 21:00
+    assert.equal(atStart.sleep, "21:00");
+    assert.equal(atStart.outsideMelatoninWindow, false, "21:00 حد النافذة يجب أن يُحسَب داخلها");
+  });
+});
+
